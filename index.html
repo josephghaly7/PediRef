@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PediRef">
+<meta name="theme-color" content="#0f0f1a">
+<title>PediRef v4</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;
+  background:#0f0f1a;color:#e4e4e8;min-height:100dvh;overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;padding-bottom:60px;
+}
+.header{
+  background:linear-gradient(135deg,#1a1a2e,#16213e);
+  padding:12px 16px;position:sticky;top:0;z-index:100;
+  border-bottom:1px solid #2a2a3e;backdrop-filter:blur(10px);
+}
+.header h1{font-size:1.2rem;font-weight:700;color:#fff}
+.header .sub{font-size:.65rem;color:#888;margin-top:1px}
+
+/* BROSLOW + AGE STRIPS */
+.strip{
+  display:flex;overflow-x:auto;padding:8px 12px;gap:6px;background:#141428;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+}
+.strip::-webkit-scrollbar{display:none}
+.chip{
+  flex:0 0 auto;padding:8px 12px;border-radius:12px;font-size:.72rem;
+  font-weight:600;text-align:center;cursor:pointer;scroll-snap-align:center;
+  border:2px solid transparent;transition:all .15s;min-width:64px;color:#fff;
+}
+.chip:active{transform:scale(.95)}
+.chip.sel{border-color:#fff;transform:scale(1.05);box-shadow:0 0 16px rgba(255,255,255,.3)}
+
+/* INPUT ROW */
+.inp-row{
+  padding:10px 16px;display:flex;gap:8px;align-items:center;
+  background:#1a1a2e;border-bottom:1px solid #2a2a3e;flex-wrap:wrap;
+}
+.inp-group{
+  display:flex;align-items:center;gap:4px;background:#252540;
+  border-radius:12px;padding:6px 10px;border:2px solid transparent;
+  transition:border .2s;flex:1;min-width:0;
+}
+.inp-group:focus-within{border-color:#7c8cf8}
+.inp-group label{font-size:.55rem;color:#666;text-transform:uppercase;font-weight:600;white-space:nowrap}
+.inp-group input{
+  background:none;border:none;color:#fff;font-size:.95rem;font-weight:700;
+  width:100%;outline:none;font-family:'SF Mono',Menlo,Consolas,monospace;
+  text-align:center;min-width:0;
+}
+.inp-group .unit{font-size:.6rem;color:#888;font-weight:500;white-space:nowrap}
+.inp-group select{
+  background:#1a1a2e;color:#fff;border:1px solid #333;border-radius:6px;
+  font-size:.6rem;padding:2px 4px;outline:none;
+}
+
+/* GCS BUTTON */
+.gcs-btn{
+  width:44px;height:44px;border-radius:12px;border:2px solid #333;
+  background:#252540;color:#aaa;font-size:.7rem;font-weight:700;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;flex-shrink:0;transition:all .15s;
+}
+.gcs-btn:active{background:#3a3a5c}
+.gcs-btn .gcs-num{font-size:1rem;color:#7c8cf8;line-height:1}
+
+/* GCS MODAL */
+.modal-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);
+  z-index:200;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal-box{
+  background:#1a1a2e;border-radius:16px;border:1px solid #2a2a3e;
+  padding:20px;width:calc(100% - 32px);max-width:360px;
+}
+.modal-box h3{font-size:.85rem;color:#7c8cf8;margin-bottom:14px}
+.modal-row{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.modal-label{font-size:.7rem;color:#888;width:28px;flex-shrink:0}
+.modal-score{
+  width:32px;height:32px;border-radius:10px;border:1px solid #333;
+  background:#252540;color:#aaa;font-size:.68rem;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .1s;
+}
+.modal-score:active{background:#3a3a5c}
+.modal-score.on{background:#7c8cf8;color:#fff;border-color:#7c8cf8}
+.modal-total{font-size:1.8rem;font-weight:800;color:#fff;text-align:center;margin:10px 0 4px}
+.modal-sev{font-size:.72rem;text-align:center;margin-bottom:14px}
+.modal-close{
+  display:block;width:100%;padding:10px;border-radius:10px;border:none;
+  background:#252540;color:#ccc;font-size:.75rem;font-weight:600;cursor:pointer;
+}
+.modal-close:active{background:#333}
+
+/* AGE EST LINE */
+.age-est{padding:6px 16px;font-size:.68rem;color:#888;background:#141428}
+
+/* SECTIONS */
+.sect{margin:6px 12px;background:#1a1a2e;border-radius:14px;border:1px solid #252540;overflow:hidden}
+.sect-head{
+  padding:10px 16px;font-size:.75rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.04em;color:#7c8cf8;border-bottom:1px solid #252540;
+  cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none;
+}
+.sect-head .emoji{font-size:1rem}
+.sect-head .arr{font-size:.7rem;margin-left:auto;transition:transform .2s;color:#555}
+.sect.collapsed .sect-head{border-bottom:none}
+.sect.collapsed .sect-body{display:none}
+.sect.collapsed .arr{transform:rotate(-90deg)}
+.sect-body{padding:0}
+
+/* DRUG CARD */
+.drug{padding:8px 14px;border-bottom:1px solid #1c1c32;line-height:1.45}
+.drug:last-child{border-bottom:none}
+.drug-name{
+  font-size:.78rem;font-weight:600;color:#e4e4e8;
+  display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+}
+.drug-name .routes{font-size:.6rem;color:#7c8cf8;font-weight:500;white-space:nowrap}
+.drug-dose{font-size:.82rem;font-weight:700;color:#7c8cf8;padding:2px 0}
+.drug-dose .perkg{font-size:.65rem;color:#888;font-weight:400}
+.drug-vol{font-size:.65rem;color:#888;padding-bottom:1px}
+.drug-note{font-size:.62rem;color:#555;line-height:1.35}
+.subhead{padding:6px 14px;font-size:.62rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.06em;background:#141428}
+
+/* EQUIP / VITALS */
+.erow{display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid #1c1c32;gap:10px}
+.erow:last-child{border-bottom:none}
+.elabel{font-size:.72rem;color:#aaa;flex:1}
+.eval{font-size:.8rem;font-weight:700;color:#fff;text-align:right}
+.vrow{display:flex;align-items:center;padding:7px 14px;border-bottom:1px solid #1c1c32;gap:10px}
+.vrow:last-child{border-bottom:none}
+.vlabel{font-size:.68rem;color:#888;width:100px;flex-shrink:0}
+.vval{font-size:.8rem;font-weight:600;color:#fff}
+.vrange{font-size:.58rem;color:#666;margin-left:4px}
+
+.disc{margin:12px;padding:12px;background:#1a1a2e;border:1px solid #2a2a3e;border-radius:10px;font-size:.58rem;color:#555;line-height:1.5;text-align:center}
+.footer{padding:12px;text-align:center;font-size:.58rem;color:#444}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.sect{animation:fadeIn .2s ease-out}
+
+/* TOOLS BAR */
+.tools-bar{display:flex;gap:6px;padding:6px 16px;background:#1a1a2e;overflow-x:auto;border-bottom:1px solid #2a2a3e}
+.tools-bar::-webkit-scrollbar{display:none}
+.tbtn{
+  flex:0 0 auto;padding:5px 9px;border-radius:8px;border:1.5px solid #333;
+  background:#252540;color:#aaa;font-size:.6rem;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;gap:3px;transition:all .15s;
+}
+.tbtn:active{background:#3a3a5c}
+.tbtn .tbval{color:#7c8cf8;font-size:.68rem;font-weight:700}
+.tbtn .tbicon{font-size:.8rem;line-height:1}
+
+/* BURN SLIDERS */
+.burn-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #1c1c32}
+.burn-row:last-child{border-bottom:none}
+.burn-label{font-size:.68rem;color:#ccc;flex:1;min-width:0}
+.burn-bodypct{font-size:.6rem;color:#888;margin-left:3px}
+.burn-slider{
+  -webkit-appearance:none;appearance:none;width:80px;height:5px;
+  border-radius:3px;background:#333;outline:none;flex-shrink:0;
+}
+.burn-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;width:22px;height:22px;border-radius:11px;
+  background:#c0392b;cursor:pointer;border:2px solid #e74c3c;
+}
+.burn-result{font-size:.68rem;font-weight:700;color:#e74c3c;min-width:50px;text-align:right;flex-shrink:0}
+.burn-total{font-size:1.4rem;font-weight:800;color:#fff;text-align:center;margin:10px 0}
+
+/* CROUP */
+.croup-grid{display:flex;flex-direction:column;gap:10px}
+.croup-item{}
+.croup-label{font-size:.7rem;color:#ccc;font-weight:600;margin-bottom:4px}
+.croup-ops{display:flex;gap:5px;flex-wrap:wrap}
+.croup-opt{
+  flex:1;min-width:0;padding:7px 4px;border-radius:8px;border:1.5px solid #333;
+  background:#252540;color:#aaa;font-size:.6rem;text-align:center;cursor:pointer;transition:all .12s;
+}
+.croup-opt.on{background:#7c8cf8;border-color:#7c8cf8;color:#fff}
+.croup-desc{font-size:.55rem;color:#666;margin-top:2px}
+
+/* CODE SHEET — compact 2-column */
+.sheet-tight{font-size:.6rem;line-height:1.3;color:#ccc}
+.sheet-hdr{text-align:center;border-bottom:2px solid #555;padding-bottom:4px;margin-bottom:5px}
+.sheet-hdr .sht{font-size:.8rem;font-weight:800;color:#fff}
+.sheet-hdr .shs{font-size:.58rem;color:#888}
+.sheet-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin:4px 0}
+.sheet-grid.sheet-2col{grid-template-columns:1fr 1fr;gap:3px 12px}
+.sheet-grid.sheet-3col{grid-template-columns:1fr 1.2fr 1fr}
+.sheet-card{margin-bottom:6px;border:1px solid #2a2a3e;border-radius:6px;background:#0a0a14}
+.sheet-card .alg-h{border-radius:6px 6px 0 0;border-bottom:1px solid #2a2a3e;padding:5px 8px;font-size:.62rem;background:#1a1a2e;color:#7c8cf8}
+.sheet-card .alg-body{padding:6px 8px}
+.sheet-row{display:grid;gap:6px;margin-bottom:6px}
+.sheet-row-3{grid-template-columns:1fr 1fr 1fr}
+.sheet-row .sheet-card{margin-bottom:0}
+.sheet-col-narrow .alg-body{padding:4px 6px}
+.sheet-col-narrow .sheet-r{font-size:.55rem;padding:0;line-height:1.25}
+.sheet-col h5{font-size:.6rem;color:#7c8cf8;margin:0 0 2px 0;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #2a2a3e;padding-bottom:1px}
+.sheet-r{display:flex;justify-content:space-between;padding:1px 0;font-size:.6rem}
+.sheet-r .sl{color:#aaa}
+.sheet-r .sr{color:#fff;font-weight:600;text-align:right;white-space:nowrap}
+.sheet-r .sr2{color:#7c8cf8;font-weight:700;text-align:right;white-space:nowrap}
+.sheet-full{margin:4px 0}
+.sheet-full h5{font-size:.6rem;color:#7c8cf8;margin:0 0 2px 0;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #2a2a3e;padding-bottom:1px}
+.sheet-full .sheet-r{display:inline-flex;gap:12px;margin-right:14px}
+
+/* ALGORITHM CARDS */
+.alg-card{border-radius:8px;padding:0;background:#1a1a2e;border:1px solid #2a2a3e}
+.alg-h{margin:0 !important;padding:6px 10px !important;border-bottom:1px solid #2a2a3e !important;font-size:.6rem !important;color:#7c8cf8 !important;background:#252540;border-radius:8px 8px 0 0}
+.alg-body{padding:6px 10px;line-height:1.25}
+.alg-body.single .alg-step:last-child{margin-bottom:0}
+.alg-trigger{font-size:.55rem;color:#aaa;padding-bottom:4px;border-bottom:1px dashed #2a2a3e;margin-bottom:4px;text-align:center}
+.alg-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:4px 0}
+.alg-col{padding:5px 7px;border-radius:6px;border:1px solid #2a2a3e}
+.alg-col.shock{border-color:#5a2828;background:#1f1414}
+.alg-col.nonshock{border-color:#5a4528;background:#1f1a14}
+.alg-title{font-size:.55rem;font-weight:700;padding:2px 0;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em;text-align:center;border-bottom:1px solid #2a2a3e}
+.shock-t{color:#ff6b6b}
+.nonshock-t{color:#ffa94d}
+.alg-step{font-size:.55rem;color:#ccc;padding:2px 0;line-height:1.3}
+.alg-step.sm{font-size:.5rem;padding:1px 0}
+.alg-step b{color:#fff;font-weight:700}
+.alg-subhead{font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:3px 0 1px;border-bottom:1px solid #2a2a3e;margin-top:3px}
+.alg-subhead.narrow{color:#7c8cf8}
+.alg-subhead.wide{color:#f48fb1}
+.alg-footer{font-size:.48rem;color:#888;padding-top:4px;margin-top:4px;border-top:1px dashed #2a2a3e;line-height:1.3}
+
+/* PRINT */
+@media print{
+  body{background:#fff!important;color:#000!important;font-size:9px;margin:0;padding:0}
+  .header,.strip,.inp-row,.tools-bar,.age-est,.disc,.footer,.modal-overlay,#gcsModal,#croupModal,#burnModal,#sheetModal,#results,.sect{display:none!important}
+  #sheetPrint{display:block!important;position:static;padding:4mm;margin:0;max-width:100%}
+  #sheetPrint *{color:#000!important;font-size:9px;line-height:1.25}
+  #sheetPrint .sheet-tight{font-size:9px}
+  #sheetPrint .sheet-hdr{border-bottom:1.5px solid #000;padding-bottom:3px;margin-bottom:4px}
+  #sheetPrint .sheet-hdr .sht{font-size:13px;font-weight:800}
+  #sheetPrint .sheet-hdr .shs{font-size:8px}
+  #sheetPrint .sheet-grid{gap:3px 8px}
+  #sheetPrint .sheet-grid.sheet-2col{grid-template-columns:1fr 1fr;gap:2px 10px}
+  #sheetPrint .sheet-grid.sheet-3col{grid-template-columns:1fr 1.2fr 1fr;gap:2px 5px}
+  #sheetPrint .sheet-card{margin-bottom:5px;border:1px solid #999;border-radius:5px;background:#fff!important;break-inside:avoid}
+  #sheetPrint .sheet-card .alg-h{border-radius:5px 5px 0 0;padding:4px 7px;font-size:10px}
+  #sheetPrint .sheet-card .alg-body{padding:5px 7px}
+  #sheetPrint .sheet-row{display:grid;gap:5px;margin-bottom:5px;break-inside:avoid}
+  #sheetPrint .sheet-row-3{grid-template-columns:1fr 1fr 1fr}
+  #sheetPrint .sheet-row .sheet-card{margin-bottom:0}
+  #sheetPrint .sheet-col-narrow .alg-body{padding:3px 5px}
+  #sheetPrint .sheet-col-narrow .sheet-r{font-size:8px;padding:0;line-height:1.2}
+  #sheetPrint .sheet-col-narrow .alg-h{font-size:9px;padding:3px 5px}
+  #sheetPrint .sheet-full{break-inside:avoid}
+  #sheetPrint .sheet-col h5{font-size:9px;border-bottom-color:#999;margin:4px 0 2px}
+  #sheetPrint .sheet-r{padding:0}
+  #sheetPrint .sheet-r .sl{color:#333!important}
+  #sheetPrint .sheet-r .sr{color:#000!important;font-weight:700}
+  #sheetPrint .sheet-r .sr2{color:#000!important;font-weight:700}
+  #sheetPrint pre{color:#000!important;font-size:7px;font-family:monospace}
+  #sheetPrint pre b{color:#000!important;font-weight:700}
+  #sheetPrint .alg-card{background:#fff!important;border:1px solid #999!important;break-inside:avoid}
+  #sheetPrint .alg-h{background:#eee!important;color:#000!important;border-bottom:1px solid #999!important}
+  #sheetPrint .alg-col.shock{background:#faf3f3!important;border:1px solid #cc8888!important}
+  #sheetPrint .alg-col.nonshock{background:#faf6f3!important;border:1px solid #c8a878!important}
+  #sheetPrint .alg-trigger{color:#333!important;border-bottom:1px dashed #999!important}
+  #sheetPrint .alg-step{color:#222!important}
+  #sheetPrint .alg-step b{color:#000!important}
+  #sheetPrint .alg-title{border-bottom:1px solid #999!important}
+  #sheetPrint .shock-t{color:#c00!important}
+  #sheetPrint .nonshock-t{color:#a05a00!important}
+  #sheetPrint .alg-subhead.narrow{color:#333!important;border-bottom:1px solid #999!important}
+  #sheetPrint .alg-subhead.wide{color:#a05a00!important;border-bottom:1px solid #999!important}
+  #sheetPrint .alg-footer{color:#555!important;border-top:1px dashed #999!important}
+  @page{margin:4mm;size:letter}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🩺 PediRef v4</h1>
+  <div class="sub">Pediatric Emergency Reference · Free & Offline</div>
+</div>
+
+<div class="strip" id="brosStrip"></div>
+<div class="strip" id="ageStrip"></div>
+
+<div class="inp-row">
+  <div class="inp-group" style="flex:1.3">
+    <label>Weight</label>
+    <input type="number" id="wi" placeholder="15" min="1" max="150" step="0.1" inputmode="decimal">
+    <span class="unit">kg</span>
+  </div>
+  <div class="gcs-btn" id="gcsBtn" onclick="openGCS()">
+    <span style="font-size:.5rem;color:#555">GCS</span>
+    <span class="gcs-num" id="gcsNum">15</span>
+  </div>
+</div>
+
+<div class="inp-row">
+  <div class="inp-group">
+    <label>Age</label>
+    <input type="number" id="ai" placeholder="3" min="0" max="18" step="0.1" inputmode="decimal">
+    <select id="au"><option value="yr" selected>yr</option><option value="mo">mo</option></select>
+  </div>
+  <div class="inp-group">
+    <label>Height</label>
+    <input type="number" id="hi" placeholder="98" min="30" max="250" step="0.5" inputmode="decimal">
+    <span class="unit">cm</span>
+  </div>
+</div>
+
+<div class="age-est" id="ageEst"></div>
+
+<div class="tools-bar">
+  <div class="tbtn" onclick="openGCS()"><span class="tbicon">🧠</span> GCS <span class="tbval" id="tbGCS">15</span></div>
+  <div class="tbtn" onclick="openCroup()"><span class="tbicon">🫁</span> Croup <span class="tbval" id="tbCroup">–</span></div>
+  <div class="tbtn" onclick="openBurn()"><span class="tbicon">🔥</span> Burns <span class="tbval" id="tbBurn">–</span></div>
+  <div class="tbtn" onclick="openSheet()"><span class="tbicon">📋</span> Code Sheet</div>
+</div>
+
+<div class="modal-overlay" id="gcsModal" onclick="closeGCS(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <h3>🧠 GCS Calculator</h3>
+    <div id="gcsRows"></div>
+    <div class="modal-total" id="gcsTotal">15</div>
+    <div class="modal-sev" id="gcsSev">Mild (13–15)</div>
+    <button class="modal-close" onclick="closeGCS()">Done</button>
+  </div>
+</div>
+
+<!-- CROUP MODAL -->
+<div class="modal-overlay" id="croupModal" onclick="closeCroup(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <h3>🫁 Westley Croup Score</h3>
+    <div class="croup-grid" id="croupGrid"></div>
+    <div class="modal-total" id="croupTotal">0</div>
+    <div class="modal-sev" id="croupSev">Mild (≤2)</div>
+    <button class="modal-close" onclick="closeCroup()">Done</button>
+  </div>
+</div>
+
+<!-- BURN MODAL -->
+<div class="modal-overlay" id="burnModal" onclick="closeBurn(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <h3>🔥 Burn Size (Pediatric Rule of Nines)</h3>
+    <div id="burnGrid" style="max-height:50vh;overflow-y:auto;margin-bottom:8px"></div>
+    <div class="burn-total" id="burnTotal">0% TBSA</div>
+    <div id="parklandCalc" style="text-align:center;font-size:.7rem;color:#ccc;line-height:1.4;padding:8px 0"></div>
+    <button class="modal-close" onclick="closeBurn()">Done</button>
+  </div>
+</div>
+
+<!-- CODE SHEET MODAL -->
+<div class="modal-overlay" id="sheetModal" onclick="closeSheet(event)">
+  <div class="modal-box" style="max-width:400px" onclick="event.stopPropagation()">
+    <h3>📋 Code Sheet</h3>
+    <div id="sheetPreview" style="max-height:60vh;overflow-y:auto;margin-bottom:12px;padding:8px;background:#141428;border-radius:10px"></div>
+    <button class="modal-close" onclick="printSheet()" style="margin-bottom:6px">🖨️ Print / Save PDF</button>
+    <button class="modal-close" onclick="closeSheet()">Close</button>
+  </div>
+</div>
+
+<!-- HIDDEN PRINT DIV -->
+<div id="sheetPrint" style="display:none"></div>
+
+<div id="results"></div>
+
+<div class="disc">
+  ⚠️ Reference only. Verify against institutional protocols. Not a substitute for clinical judgment.<br>
+  Data: PALS/APLS guidelines, Broselow Tape, FP Notebook (public clinical references).
+</div>
+<div class="footer">PediRef v3 · Open Source · Works Offline</div>
+
+<script>
+// ==================== DATA ====================
+
+const BROSLOW = [
+  {c:'Grey',css:'broselow-grey',kg:5,ageLo:0,ageHi:.16,lenLo:57,lenHi:61},
+  {c:'Pink',css:'broselow-pink',kg:7,ageLo:.16,ageHi:.5,lenLo:62,lenHi:68},
+  {c:'Red',css:'broselow-red',kg:9,ageLo:.5,ageHi:1,lenLo:69,lenHi:76},
+  {c:'Purple',css:'broselow-purple',kg:11,ageLo:1,ageHi:2,lenLo:77,lenHi:85},
+  {c:'Yellow',css:'broselow-yellow',kg:13,ageLo:2,ageHi:3,lenLo:86,lenHi:97},
+  {c:'White',css:'broselow-white',kg:17,ageLo:3,ageHi:5,lenLo:98,lenHi:110},
+  {c:'Blue',css:'broselow-blue',kg:21,ageLo:5,ageHi:7,lenLo:111,lenHi:122},
+  {c:'Orange',css:'broselow-orange',kg:27,ageLo:7,ageHi:10,lenLo:123,lenHi:137},
+  {c:'Green',css:'broselow-green',kg:34,ageLo:10,ageHi:13,lenLo:138,lenHi:150},
+];
+
+const brColors={Grey:'#9e9e9e',Pink:'#f48fb1',Red:'#ef5350',Purple:'#7e57c2',Yellow:'#fdd835',White:'#e0e0e0',Blue:'#42a5f5',Orange:'#ff9800',Green:'#66bb6a'};
+
+const AGES = [
+  {label:'NB',kg:3.5},{label:'6mo',kg:7},{label:'1yr',kg:10},
+  {label:'2yr',kg:12},{label:'3yr',kg:14},{label:'5yr',kg:18},
+  {label:'8yr',kg:25},{label:'10yr',kg:32},{label:'12yr',kg:40},
+  {label:'14yr',kg:50},{label:'Adult',kg:70},
+];
+
+const VITALS = [
+  {a:[0,.16],hr:[120,180],rr:[40,60],sbp:[65,95]},
+  {a:[.16,.5],hr:[110,170],rr:[25,40],sbp:[70,100]},
+  {a:[.5,1],hr:[100,160],rr:[20,30],sbp:[70,105]},
+  {a:[1,2],hr:[100,150],rr:[20,30],sbp:[70,110]},
+  {a:[2,5],hr:[80,140],rr:[20,28],sbp:[75,115]},
+  {a:[5,12],hr:[60,120],rr:[12,25],sbp:[85,120]},
+  {a:[12,18],hr:[60,100],rr:[12,18],sbp:[95,130]},
+];
+
+const MEDS = [
+{title:'RSI — Pretreatment',emoji:'💉',drugs:[
+  {n:'Atropine',sub:'Bradycardia / <1 yr',lo:.01,hi:.02,u:'mg/kg',r:'IV/IO',c:'0.1 mg/ml',note:'Per 2025 AHA PALS: 0.02 mg/kg, no minimum dose for pretreatment. May repeat once.'},
+  {n:'Lidocaine',sub:'↑ICP',lo:1,hi:1.5,u:'mg/kg',r:'IV/IO',c:'20 mg/ml (2%)',mx:100,mu:'mg',note:'Give 2-3 min before laryngoscopy. Blunts ICP rise.'},
+  {n:'Fentanyl',sub:'Blunt sympathetic',lo:1,hi:3,u:'mcg/kg',r:'IV/IO',c:'50 mcg/ml',mx:100,mu:'mcg',note:'Give over 1-2 min. Watch for chest wall rigidity.'},
+]},
+{title:'RSI — Induction',emoji:'😴',drugs:[
+  {n:'Etomidate',sub:'',lo:.3,hi:.3,u:'mg/kg',r:'IV/IO',c:'2 mg/ml',mx:20,mu:'mg',note:'Hemodynamically neutral. Adrenal suppression — avoid in sepsis. Push over 30-60 sec.'},
+  {n:'Ketamine',sub:'',lo:1,hi:2,u:'mg/kg',r:'IV/IO',c:'50 or 100 mg/ml',note:'1 mg/kg for hypotension; 2 mg/kg for full dissociation. Bronchodilator — preferred in asthma.'},
+  {n:'Propofol',sub:'',lo:2,hi:3,u:'mg/kg',r:'IV/IO',c:'10 mg/ml',note:'Avoid if hypotensive (SBP < 70+2×age). Use lower end in shock.'},
+  {n:'Midazolam',sub:'Rarely used alone',lo:.1,hi:.3,u:'mg/kg',r:'IV/IO',c:'5 mg/ml',mx:5,mu:'mg',note:'Onset 1-2 min. Lower dose with opioids.'},
+]},
+{title:'RSI — Paralysis',emoji:'💪',drugs:[
+  {n:'Succinylcholine',sub:'',lo:1,hi:2,u:'mg/kg',r:'IV/IO',c:'20 mg/ml',mx:150,mu:'mg',note:'<20 kg: use 2 mg/kg. >20 kg: 1 mg/kg. CI: burns>24h, crush, ↑K⁺, NM disease.'},
+  {n:'Rocuronium',sub:'Preferred',lo:.6,hi:1.2,u:'mg/kg',r:'IV/IO',c:'10 mg/ml',mx:100,mu:'mg',note:'RSI: 1-1.2 mg/kg. Standard: 0.6 mg/kg. Onset 45-90 sec.'},
+  {n:'Vecuronium',sub:'',lo:.1,hi:.15,u:'mg/kg',r:'IV/IO',c:'1 mg/ml',mx:10,mu:'mg',note:'RSI: 0.15 mg/kg. Standard: 0.1 mg/kg. Slower onset than roc.'},
+]},
+{title:'RSI — Post-Intubation Sedation',emoji:'💤',drugs:[
+  {n:'Fentanyl',sub:'Analgesia',lo:.5,hi:2,u:'mcg/kg',r:'IV',c:'50 mcg/ml',note:'Bolus, then 1-5 mcg/kg/hr infusion.'},
+  {n:'Morphine',sub:'Analgesia',lo:.05,hi:.1,u:'mg/kg',r:'IV',c:'2 mg/ml',mx:4,mu:'mg',note:'q2-4h bolus. Titrate to pain.'},
+  {n:'Midazolam',sub:'Sedation',lo:.05,hi:.15,u:'mg/kg',r:'IV',c:'5 mg/ml',mx:2,mu:'mg',note:'Bolus, then 0.05-0.4 mg/kg/hr infusion.'},
+  {n:'Lorazepam',sub:'Sedation',lo:.05,hi:.1,u:'mg/kg',r:'IV',c:'2 mg/ml',mx:2,mu:'mg',note:'q4-6h bolus. Longer duration.'},
+  {n:'Propofol',sub:'Sedation infusion',lo:.5,hi:4,u:'mg/kg/hr',r:'IV',c:'10 mg/ml',note:'Start low, titrate. Avoid bolus in peds. Watch for PRIS.'},
+  {n:'Dexmedetomidine',sub:'Sedation infusion',lo:.2,hi:1,u:'mcg/kg/hr',r:'IV',c:'4 mcg/ml',note:'May load 0.5-2 mcg/kg over 10 min. Bradycardia risk.'},
+  {n:'Ketamine',sub:'Sedation/analgesia',lo:.5,hi:2,u:'mg/kg/hr',r:'IV',c:'100 mg/ml',note:'Infusion. Bronchodilator. Emergence phenomena.'},
+]},
+{title:'Resuscitation',emoji:'⚡',drugs:[
+  {n:'Epinephrine',sub:'Cardiac arrest',lo:.01,hi:.01,u:'mg/kg',r:'IV/IO',c:'1:10,000 (0.1 mg/ml)',mx:1,mu:'mg',note:'Repeat q3-5 min. No maximum in arrest.'},
+  {n:'Epinephrine',sub:'Cardiac arrest (ET)',lo:.05,hi:.1,u:'mg/kg',r:'ET',c:'1:1,000 (1 mg/ml)',mx:10,mu:'mg',note:'Dilute in 3-5 ml NS. IV/IO strongly preferred over ET.'},
+  {n:'Amiodarone',sub:'VF/pVT',lo:5,hi:5,u:'mg/kg',r:'IV/IO',c:'50 mg/ml',mx:300,mu:'mg',note:'Max 300 mg 1st dose, 150 mg 2nd. For shock-refractory VF/pVT.'},
+  {n:'Lidocaine',sub:'VF/pVT (2nd line)',lo:1,hi:1,u:'mg/kg',r:'IV/IO',c:'20 mg/ml (2%)',mx:100,mu:'mg',note:'Alternative to amiodarone for VF/pVT.'},
+  {n:'Adenosine (1st)',sub:'SVT',lo:.1,hi:.1,u:'mg/kg',r:'IV',c:'3 mg/ml',mx:6,mu:'mg',note:'RAPID push (1-2 sec) followed by immediate flush. Proximal IV preferred.'},
+  {n:'Adenosine (2nd)',sub:'SVT — if 1st fails',lo:.2,hi:.2,u:'mg/kg',r:'IV',c:'3 mg/ml',mx:12,mu:'mg',note:'Double the 1st dose. RAPID push + flush.'},
+  {n:'Atropine',sub:'Symptomatic brady',lo:.02,hi:.02,u:'mg/kg',r:'IV/IO',c:'0.1 mg/ml',mn:.1,mx:.5,mu:'mg',note:'Min 0.1 mg. Max 0.5 mg (<40 kg), 1 mg (>40 kg).'},
+  {n:'Atropine',sub:'Brady (ET)',lo:.03,hi:.04,u:'mg/kg',r:'ET',c:'0.4 mg/ml',note:'If no IV/IO access.'},
+  {n:'Naloxone',sub:'Opioid reversal',lo:.01,hi:.1,u:'mg/kg',r:'IV/IO/IM/IN',c:'0.4 mg/ml',mx:2,mu:'mg',note:'Titrate to respiratory drive. Lower end for chronic opioid to avoid withdrawal.'},
+  {n:'Calcium Chloride',sub:'HyperK⁺ / CCB OD',lo:20,hi:20,u:'mg/kg',r:'IV/IO',c:'100 mg/ml (10%)',mx:1000,mu:'mg',note:'Give slowly. Central line preferred. Extravasation risk.'},
+  {n:'Magnesium Sulfate',sub:'Torsades / asthma',lo:25,hi:50,u:'mg/kg',r:'IV/IO',c:'500 mg/ml (50%)',mx:2000,mu:'mg',note:'25 mg/kg for asthma, 50 mg/kg for torsades.'},
+  {n:'Sodium Bicarbonate',sub:'Prolonged arrest',lo:1,hi:1,u:'mEq/kg',r:'IV/IO',c:'1 mEq/ml (8.4%)',mx:50,mu:'mEq',note:'<3 mo: use 4.2% solution. For hyperK⁺, TCA OD, prolonged arrest.'},
+  {n:'Dextrose (D10W)',sub:'Hypoglycemia',lo:5,hi:10,u:'ml/kg',r:'IV/IO',c:'D10W (100 mg/ml)',note:'0.5-1 g/kg. For documented hypoglycemia. PALS: 5-10 mL/kg of D10W.'},
+  {n:'Dextrose (D25W)',sub:'Hypoglycemia (>2yr)',lo:2,hi:4,u:'ml/kg',r:'IV/IO',c:'D25W (250 mg/ml)',note:'0.5-1 g/kg. When volume matters. >2 yr or >10 kg.'},
+]},
+{title:'Anaphylaxis',emoji:'🐝',drugs:[
+  {n:'Epinephrine',sub:'1st line — IM',lo:.01,hi:.01,u:'mg/kg',r:'IM',c:'1:1,000 (1 mg/ml)',mx:.5,mu:'mg',note:'Max 0.3 mg (<30 kg), 0.5 mg (≥30 kg). Anterolateral thigh. Repeat q5-15 min.'},
+  {n:'Epinephrine',sub:'Severe / impending arrest',lo:.01,hi:.01,u:'mg/kg',r:'IV/IO',c:'1:10,000 (0.1 mg/ml)',mx:1,mu:'mg',note:'For shock or impending arrest ONLY. Slow IV push.'},
+  {n:'Diphenhydramine',sub:'H1 blocker',lo:1,hi:2,u:'mg/kg',r:'IV/IO/IM/PO',c:'50 mg/ml',mx:50,mu:'mg',note:'Max 50 mg.'},
+  {n:'Methylprednisolone',sub:'Steroid',lo:1,hi:2,u:'mg/kg',r:'IV/IO',c:'62.5 mg/ml',mx:125,mu:'mg',note:'Biphasic reaction prevention. Max 125 mg.'},
+  {n:'Dexamethasone',sub:'Steroid (alt)',lo:.6,hi:.6,u:'mg/kg',r:'PO/IV/IO',c:'4 mg/ml',mx:16,mu:'mg',note:'Max 16 mg. Alternative to methylprednisolone.'},
+  {n:'Famotidine',sub:'H2 blocker',lo:.5,hi:.5,u:'mg/kg',r:'IV/IO',c:'10 mg/ml',mx:20,mu:'mg',note:'Max 20 mg.'},
+  {n:'Ranitidine',sub:'H2 blocker (alt)',lo:1,hi:1,u:'mg/kg',r:'IV/IO',c:'25 mg/ml',mx:50,mu:'mg',note:'Alternative to famotidine. Max 50 mg.'},
+  {n:'Albuterol',sub:'Bronchospasm',lo:2.5,hi:5,u:'mg',r:'Neb',c:'0.5% (5 mg/ml)',fixed:true,note:'Fixed dose (not weight-based). Continuous for severe. Add ipratropium for mod-severe.'},
+  {n:'IV Fluid Bolus',sub:'Hypotension',lo:20,hi:20,u:'ml/kg',r:'IV/IO',c:'NS or LR',note:'Repeat as needed. Up to 60 ml/kg in first hour for severe shock.'},
+]},
+{title:'Status Epilepticus',emoji:'🧠',drugs:[
+  {n:'Lorazepam',sub:'1st line',lo:.05,hi:.1,u:'mg/kg',r:'IV/IO',c:'2 mg/ml',mx:4,mu:'mg',note:'Max 4 mg. Repeat once if needed. Onset 2-5 min.'},
+  {n:'Midazolam',sub:'No IV access',lo:.1,hi:.2,u:'mg/kg',r:'IM/IN',c:'5 mg/ml',mx:10,mu:'mg',note:'IN via MAD device. Also buccal route.'},
+  {n:'Diazepam',sub:'No IV access',lo:.2,hi:.5,u:'mg/kg',r:'PR/IV',c:'5 mg/ml',mx:20,mu:'mg',note:'PR max 20 mg, IV max 10 mg. Rectal gel if available.'},
+  {n:'Fosphenytoin',sub:'Load',lo:15,hi:20,u:'mg PE/kg',r:'IV/IO',c:'50 mg PE/ml',mx:1500,mu:'mg PE',note:'Load over 10 min. PE = phenytoin equivalents. Can give IM if needed.'},
+  {n:'Levetiracetam',sub:'Load',lo:20,hi:60,u:'mg/kg',r:'IV/IO',c:'100 mg/ml',mx:4500,mu:'mg',note:'60 mg/kg for status; 20-40 mg/kg for other seizures. Give over 5-15 min.'},
+  {n:'Phenobarbital',sub:'Load (2nd line)',lo:15,hi:20,u:'mg/kg',r:'IV/IO',c:'65 or 130 mg/ml',mx:1000,mu:'mg',note:'SLOW push. Respiratory depression risk — have airway ready.'},
+]},
+{title:'Procedural Sedation',emoji:'💤',drugs:[
+  {n:'Ketamine',sub:'Dissociative',lo:1,hi:2,u:'mg/kg',r:'IV/IO',c:'100 mg/ml',note:'Lower for analgesia, higher for dissociation. Give over 60 sec. Maintain airway.'},
+  {n:'Midazolam',sub:'Anxiolysis',lo:.05,hi:.15,u:'mg/kg',r:'IV/IO/IM/IN/PO',c:'5 mg/ml',mx:2,mu:'mg',note:'Max 2 mg. IN via MAD. PO liquid available.'},
+  {n:'Fentanyl',sub:'Analgesia',lo:.5,hi:2,u:'mcg/kg',r:'IV/IO/IN',c:'50 mcg/ml',mx:100,mu:'mcg',note:'IN via MAD for quick pain control. Watch chest wall rigidity.'},
+  {n:'Morphine',sub:'Analgesia',lo:.05,hi:.1,u:'mg/kg',r:'IV/IO/IM',c:'2 mg/ml',mx:4,mu:'mg',note:'Titrate to pain. Onset 5-10 min IV.'},
+]},
+{title:'Push-Dose Pressors',emoji:'📈',drugs:[
+  {n:'Epinephrine',sub:'Push-dose',lo:.5,hi:1,u:'mcg/kg',r:'IV',c:'(diluted) 10 mcg/ml',mx:10,mu:'mcg',note:'Prep: 1 ml of 1:10,000 + 9 ml NS = 10 mcg/ml. Push 1 ml at a time q2-5min. For post-arrest or peri-intubation hypotension.'},
+  {n:'Phenylephrine',sub:'Push-dose',lo:5,hi:20,u:'mcg/kg',r:'IV',c:'(diluted) 100 mcg/ml',note:'Prep: 10 mg in 100 ml NS = 100 mcg/ml. Titrate to effect. q2-5min.'},
+]},
+{title:'Asthma / Bronchospasm',emoji:'🫁',drugs:[
+  {n:'Albuterol',sub:'Nebulized',lo:2.5,hi:5,u:'mg',r:'Neb',c:'0.5% (5 mg/ml)',fixed:true,note:'Fixed dose (not weight-based). Continuous for severe. Add ipratropium for mod-severe.'},
+  {n:'Albuterol MDI',sub:'Metered-dose',lo:4,hi:8,u:'puffs',r:'MDI',c:'90 mcg/puff',fixed:true,note:'Fixed dose. With spacer. 4 puffs mild-mod, 8 puffs severe. ≈2.5 mg neb equivalent.'},
+  {n:'Ipratropium',sub:'Anticholinergic',lo:250,hi:500,u:'mcg',r:'Neb',c:'0.02%',fixed:true,note:'Fixed dose. First hour only (max 3 doses). For mod-severe exacerbations.'},
+  {n:'Dexamethasone',sub:'Steroid',lo:.6,hi:.6,u:'mg/kg',r:'PO/IV',c:'4 mg/ml',mx:16,mu:'mg',note:'Max 16 mg. Single dose. Equivalent to 5-day prednisone course.'},
+  {n:'Prednisone',sub:'Steroid',lo:1,hi:2,u:'mg/kg',r:'PO',c:'Liquid 5 mg/ml',mx:60,mu:'mg',note:'Max 60 mg/day. × 5 days. Taper not needed for short course.'},
+  {n:'Magnesium Sulfate',sub:'Severe asthma',lo:25,hi:50,u:'mg/kg',r:'IV',c:'500 mg/ml (50%)',mx:2000,mu:'mg',note:'For mod-severe not responding to initial therapy. Give over 20 min.'},
+  {n:'Epinephrine IM',sub:'Severe / anaphylactic',lo:.01,hi:.01,u:'mg/kg',r:'IM',c:'1:1,000 (1 mg/ml)',mx:.3,mu:'mg',note:'Max 0.3 mg. For severe component or anaphylaxis overlap.'},
+]},
+{title:'Pain Management',emoji:'💊',drugs:[
+  {n:'Acetaminophen',sub:'Pain / fever',lo:10,hi:15,u:'mg/kg',r:'PO/PR',c:'160 mg/5ml',mx:1000,mu:'mg',note:'Max 75 mg/kg/day. q4-6h. Not to exceed 5 doses/24h.'},
+  {n:'Ibuprofen',sub:'Pain / fever',lo:5,hi:10,u:'mg/kg',r:'PO',c:'100 mg/5ml',mx:600,mu:'mg',note:'>6 mo only. q6-8h. Max 40 mg/kg/day. With food.'},
+  {n:'Morphine',sub:'Mod-severe pain',lo:.05,hi:.1,u:'mg/kg',r:'IV/IO/IM',c:'2 mg/ml',mx:4,mu:'mg',note:'Titrate to pain. Onset 5-10 min IV. Max 4 mg/dose.'},
+  {n:'Fentanyl',sub:'Mod-severe pain',lo:.5,hi:2,u:'mcg/kg',r:'IV/IO/IN',c:'50 mcg/ml',mx:100,mu:'mcg',note:'IN via MAD for quick pain control.'},
+  {n:'Hydromorphone',sub:'Mod-severe pain',lo:.01,hi:.015,u:'mg/kg',r:'IV/IO',c:'2 mg/ml',mx:1,mu:'mg',note:'Max 1 mg. More potent than morphine.'},
+  {n:'Ketorolac',sub:'Mod-severe pain',lo:.5,hi:.5,u:'mg/kg',r:'IV/IM',c:'30 mg/ml',mx:30,mu:'mg',note:'>2 yr. Single dose. Not for surgical bleeding risk.'},
+]},
+{title:'Antiemetics / GI',emoji:'🤢',drugs:[
+  {n:'Ondansetron',sub:'Nausea/vomiting',lo:.15,hi:.15,u:'mg/kg',r:'IV/PO/ODT',c:'2 mg/ml (IV)',mx:8,mu:'mg',note:'Max 8 mg. ODT dissolves on tongue. q8h. ECG: possible QTc.'},
+  {n:'Metoclopramide',sub:'Nausea/gastroparesis',lo:.1,hi:.1,u:'mg/kg',r:'IV',c:'5 mg/ml',mx:10,mu:'mg',note:'Max 10 mg. Give over 2 min. Dystonic reaction risk.'},
+  {n:'Famotidine',sub:'GI / reflux',lo:.5,hi:.5,u:'mg/kg',r:'IV',c:'10 mg/ml',mx:20,mu:'mg',note:'Max 20 mg. Alternative to ranitidine.'},
+]},
+{title:'Antibiotics (Common ED)',emoji:'🦠',drugs:[
+  {n:'Ceftriaxone',sub:'',lo:50,hi:100,u:'mg/kg',r:'IV/IM',c:'100 mg/ml',mx:2000,mu:'mg',note:'50 mg/kg for most infections; 100 mg/kg for meningitis. Max 2 g.'},
+  {n:'Cefazolin',sub:'',lo:25,hi:50,u:'mg/kg',r:'IV',c:'100 mg/ml',mx:2000,mu:'mg',note:'Pre-op or skin/soft tissue infections.'},
+  {n:'Vancomycin',sub:'',lo:15,hi:20,u:'mg/kg',r:'IV',c:'5 mg/ml',mx:2000,mu:'mg',note:'15 mg/kg for most; 20 mg/kg for meningitis. Infuse over 60 min. Red man syndrome.'},
+  {n:'Ampicillin',sub:'',lo:50,hi:100,u:'mg/kg',r:'IV',c:'100 mg/ml',mx:2000,mu:'mg',note:'50 mg/kg for most; 100 mg/kg for meningitis.'},
+  {n:'Gentamicin',sub:'',lo:2,hi:2.5,u:'mg/kg',r:'IV/IM',c:'10 mg/ml',mx:120,mu:'mg',note:'Conventional: 2-2.5 mg/kg q8h. Alternative: 5-7 mg/kg q24h.'},
+  {n:'Clindamycin',sub:'',lo:7.5,hi:10,u:'mg/kg',r:'IV/PO',c:'150 mg/ml (IV)',mx:900,mu:'mg',note:'MRSA coverage. Max 900 mg IV. PO liquid tastes bad.'},
+  {n:'Metronidazole',sub:'',lo:10,hi:15,u:'mg/kg',r:'IV/PO',c:'5 mg/ml',mx:500,mu:'mg',note:'Max 500 mg load. Anaerobic coverage.'},
+]},
+];
+
+// ==================== CALC ENGINE ====================
+
+function estAgeFromWt(kg){
+  for(const b of BROSLOW)if(kg>=b.kg-2&&kg<=b.kg+2)return[b.ageLo,b.ageHi];
+  if(kg<=5)return[0,.16];if(kg<=7)return[.16,.5];if(kg<=9)return[.5,1];
+  if(kg<=11)return[1,2];if(kg<=13)return[2,3];if(kg<=17)return[3,5];
+  if(kg<=24)return[5,9];if(kg<=34)return[9,13];return[13,18];
+}
+function findBroselow(kg){
+  let best=BROSLOW[0];
+  for(const b of BROSLOW)if(Math.abs(b.kg-kg)<Math.abs(best.kg-kg))best=b;
+  return best;
+}
+function kgFromAge(ageYr){
+  for(const b of BROSLOW)if(ageYr>=b.ageLo&&ageYr<b.ageHi)return b.kg;
+  if(ageYr<.16)return 5;if(ageYr<.5)return 7;if(ageYr<1)return 9;
+  if(ageYr<2)return 11;if(ageYr<3)return 13;if(ageYr<5)return 17;
+  if(ageYr<7)return 21;if(ageYr<10)return 27;if(ageYr<13)return 34;
+  return 50;
+}
+function kgFromHeight(cm){
+  for(const b of BROSLOW)if(cm>=b.lenLo&&cm<=b.lenHi)return b.kg;
+  if(cm<57)return 5;if(cm<69)return 7;if(cm<77)return 9;
+  if(cm<86)return 11;if(cm<98)return 13;if(cm<111)return 17;
+  if(cm<123)return 21;if(cm<138)return 27;if(cm<150)return 34;
+  return cm>170?70:50;
+}
+function getVitals(ay){
+  for(const v of VITALS)if(ay>=v.a[0]&&ay<v.a[1])return v;
+  return VITALS[VITALS.length-1];
+}
+function getEquip(kg,ay){
+  const ec=ay>.5?Math.round((ay/4+3.5)*2)/2:(kg<3?2.5:3);
+  const eu=ay>.5?Math.round((ay/4+4)*2)/2:(kg<3?3:3.5);
+  const ed=ay<1?Math.round((kg+6)*2)/2:Math.round((ay/2+12)*2)/2;
+  let b,su,lma;
+  if(kg<5){b='1 Miller';su='8F';lma='1'}
+  else if(kg<10){b='1 Miller';su='8-10F';lma='1.5'}
+  else if(kg<15){b='1-2 Miller';su='10F';lma='2'}
+  else if(kg<25){b='2 Miller/Mac';su='10F';lma='2.5'}
+  else if(kg<35){b='2-3 Miller/Mac';su='12F';lma='3'}
+  else{b='3-4 Mac';su='12-14F';lma='4'}
+  let ct;
+  if(kg<7)ct='10-12F';else if(kg<12)ct='16-20F';else if(kg<20)ct='20-24F';
+  else if(kg<30)ct='28-32F';else ct='32-40F';
+  let foley;
+  if(kg<7)foley='5-6F';else if(kg<12)foley='8-10F';else if(kg<25)foley='10-12F';else foley='12-14F';
+  let ng;
+  if(kg<7)ng='5-6F';else if(kg<12)ng='8-10F';else if(kg<25)ng='10-14F';else ng='14-18F';
+  const tvl=Math.round(kg*6),tvh=Math.round(kg*10);
+  let rr;if(ay<.16)rr='20-25';else if(ay<1)rr='15-25';else rr='12-20';
+  return{ec,eu,ed,b,su,lma,ct,foley,ng,tvl,tvh,rr};
+}
+
+function fmtD(d){if(d<.1)return (Math.round(d*1e3)/1e3)+'';if(d<1)return (Math.round(d*100)/100)+'';if(d<10)return (Math.round(d*10)/10)+'';return Math.round(d)+'';}
+function fmtDR(lo,hi,u,kg,mxD,mxU,mnD,fixed){
+  if(fixed){
+    const unitDisp=mxU||u;
+    if(lo===hi)return fmtD(lo)+' '+unitDisp;
+    return fmtD(lo)+'–'+fmtD(hi)+' '+unitDisp;
+  }
+  // Infusion rates — per-kg IS the dose, don't multiply by weight
+  if(u.includes('/hr')){
+    if(lo===hi)return fmtD(lo)+' '+u;
+    return fmtD(lo)+'–'+fmtD(hi)+' '+u;
+  }
+  let vlo=lo*kg,vhi=hi*kg;
+  if(mxD!==undefined){vlo=Math.min(vlo,mxD);vhi=Math.min(vhi,mxD);}
+  if(mnD!==undefined){vlo=Math.max(vlo,mnD);vhi=Math.max(vhi,mnD);}
+  const perkgStr=lo===hi?fmtD(lo):fmtD(lo)+'–'+fmtD(hi);
+  const unitDisp=mxU||u.replace('/kg','');
+  if(Math.abs(vlo-vhi)<.01||lo===hi){
+    return perkgStr+' '+u+' → '+fmtD(vlo)+' '+unitDisp;
+  }
+  return perkgStr+' '+u+' → '+fmtD(vlo)+'–'+fmtD(vhi)+' '+unitDisp;
+}
+function calcVol(lo,hi,kg,cStr,mxD){
+  if(!cStr||cStr.includes('D10')||cStr.includes('D25')||cStr.includes('NS')||cStr.includes('Neb')||cStr.includes('MDI')||cStr.includes('puffs'))return'';
+  let m=null;
+  const mgm=cStr.match(/([\d.]+)\s*mg\s*\/\s*ml/);
+  const mcgm=cStr.match(/([\d.]+)\s*mcg\s*\/\s*ml/);
+  const mEqm=cStr.match(/([\d.]+)\s*mEq\s*\/\s*ml/);
+  const pctM=cStr.match(/\(([\d.]+)\s*mg\/ml\)/);
+  if(pctM)m=parseFloat(pctM[1]);
+  else if(mgm)m=parseFloat(mgm[1]);
+  else if(mcgm)m=parseFloat(mcgm[1])/1000;
+  else if(mEqm)m=parseFloat(mEqm[1]);
+  if(!m||m===0)return'';
+  let vlo=(lo*kg)/m,vhi=(hi*kg)/m;
+  if(mxD!==undefined){const mxV=mxD/m;vlo=Math.min(vlo,mxV);vhi=Math.min(vhi,mxV);}
+  if(lo===hi||Math.abs(vlo-vhi)<.01){
+    if(vlo<.05)return'';
+    return vlo<1?vlo.toFixed(2)+' ml':Math.round(vlo*10)/10+' ml';
+  }
+  if(vlo<.05&&vhi<.05)return'';
+  return (vlo<1?vlo.toFixed(2):Math.round(vlo*10)/10)+'–'+(vhi<1?vhi.toFixed(2):Math.round(vhi*10)/10)+' ml';
+}
+
+// ==================== STATE ====================
+let kg=15,ageYr=3,heightCm=98;
+let gcsE=4,gcsV=5,gcsM=6;
+let croupStr=0,croupRet=0,croupAir=0,croupCya=0,croupLOC=0;
+let burnZones={head:0,rArm:0,lArm:0,chest:0,back:0,rLeg:0,lLeg:0,peri:0};
+let updating=false; // prevent loops
+
+const wi=document.getElementById('wi'),ai=document.getElementById('ai'),au=document.getElementById('au'),
+  hi=document.getElementById('hi'),ae=document.getElementById('ageEst'),
+  bs=document.getElementById('brosStrip'),ag=document.getElementById('ageStrip'),
+  rs=document.getElementById('results');
+
+// ==================== INIT UI ====================
+(function buildStrips(){
+  // Broselow
+  let h='';
+  for(const b of BROSLOW){
+    const isLight=['Grey','Pink','Yellow','White'].includes(b.c);
+    h+=`<div class="chip" data-kg="${b.kg}" data-c="${b.c}" style="background:${brColors[b.c]};${isLight?'color:#111':''}">${b.c}<br><span style="font-size:.6rem">${b.kg} kg</span></div>`;
+  }
+  bs.innerHTML=h;
+  bs.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',function(){
+    setWeight(parseFloat(this.dataset.kg));
+  }));
+  // Age chips
+  h='';
+  for(const a of AGES)h+=`<div class="chip" data-kg="${a.kg}" style="background:#252540;color:#aaa;border:1px solid #2a2a3e">${a.label}<br><span style="font-size:.6rem">${a.kg}kg</span></div>`;
+  ag.innerHTML=h;
+  ag.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',function(){
+    setWeight(parseFloat(this.dataset.kg));
+  }));
+})();
+
+function setWeight(w){
+  if(updating)return;updating=true;
+  kg=w;wi.value=kg;
+  const[al,ah]=estAgeFromWt(kg);ageYr=(al+ah)/2;
+  ai.value=ageYr>=1?Math.round(ageYr*10)/10:Math.round(ageYr*12*10)/10;
+  au.value=ageYr>=1?'yr':'mo';
+  const br=findBroselow(kg);
+  heightCm=Math.round((br.lenLo+br.lenHi)/2);hi.value=heightCm;
+  updating=false;renderAll();
+}
+function setAge(a,unit){
+  if(updating)return;updating=true;
+  const ayr=unit==='mo'?a/12:a;
+  ageYr=ayr;kg=kgFromAge(ayr);wi.value=kg;
+  const[al,ah]=estAgeFromWt(kg);const br=findBroselow(kg);
+  heightCm=Math.round((br.lenLo+br.lenHi)/2);hi.value=heightCm;
+  updating=false;renderAll();
+}
+function setHeight(h){
+  if(updating)return;updating=true;
+  heightCm=h;kg=kgFromHeight(h);wi.value=kg;
+  const[al,ah]=estAgeFromWt(kg);ageYr=(al+ah)/2;
+  ai.value=ageYr>=1?Math.round(ageYr*10)/10:Math.round(ageYr*12*10)/10;
+  au.value=ageYr>=1?'yr':'mo';
+  updating=false;renderAll();
+}
+
+// Input listeners
+wi.addEventListener('input',function(){if(updating)return;const v=parseFloat(this.value);if(v>0&&v<=200){updating=true;kg=v;const[al,ah]=estAgeFromWt(kg);ageYr=(al+ah)/2;ai.value=ageYr>=1?Math.round(ageYr*10)/10:Math.round(ageYr*12*10)/10;au.value=ageYr>=1?'yr':'mo';const br=findBroselow(kg);heightCm=Math.round((br.lenLo+br.lenHi)/2);hi.value=heightCm;updating=false;renderAll();}});
+
+ai.addEventListener('input',function(){if(updating)return;const v=parseFloat(this.value);if(v>=0&&v<=18)setAge(v,au.value);});
+au.addEventListener('change',function(){if(updating)return;const v=parseFloat(ai.value);if(v>=0&&v<=18)setAge(v,au.value);});
+hi.addEventListener('input',function(){if(updating)return;const v=parseFloat(this.value);if(v>=30&&v<=250)setHeight(v);});
+
+// ==================== GCS ====================
+function gcsScore(){return gcsE+gcsV+gcsM;}
+function openGCS(){
+  document.getElementById('gcsModal').classList.add('open');
+  renderGCSModal();
+}
+function closeGCS(e){
+  if(e&&e.target!==document.getElementById('gcsModal'))return;
+  document.getElementById('gcsModal').classList.remove('open');
+  document.getElementById('gcsNum').textContent=gcsScore();
+}
+function renderGCSModal(){
+  const labels={E:['Spontaneous','To voice','To pain','None'],
+    V:['Oriented','Confused','Words','Sounds','None'],
+    M:['Obeys','Localizes','Withdraws','Flexion','Extension','None']};
+  const vals={E:[4,3,2,1],V:[5,4,3,2,1],M:[6,5,4,3,2,1]};
+  let h='';
+  for(const t of['E','V','M']){
+    const cur=t==='E'?gcsE:t==='V'?gcsV:gcsM;
+    h+=`<div class="modal-row"><span class="modal-label">${t}</span>`+
+      vals[t].map((v,j)=>`<div class="modal-score gcs-${t}${v}${v===cur?' on':''}" data-t="${t}" data-v="${v}">${v}</div>`).join('')+
+      `<span style="font-size:.6rem;color:#666;margin-left:4px">${labels[t][vals[t].indexOf(cur)]}</span></div>`;
+  }
+  document.getElementById('gcsRows').innerHTML=h;
+  const sev=gcsScore();
+  let sevTxt=sev>=13?'Mild (13–15)':sev>=9?'Moderate (9–12)':'Severe (3–8)';
+  document.getElementById('gcsTotal').textContent=sev;
+  document.getElementById('gcsSev').textContent=sevTxt;
+  // Bind
+  document.querySelectorAll('.modal-score').forEach(b=>b.addEventListener('click',function(){
+    const t=this.dataset.t,v=parseInt(this.dataset.v);
+    if(t==='E')gcsE=v;else if(t==='V')gcsV=v;else gcsM=v;
+    renderGCSModal();
+  }));
+}
+
+// ==================== CROUP (WESTLEY) ====================
+const CROUP_COMPONENTS=[
+  {id:'croupStr',label:'Stridor',opts:[{v:0,n:'None'},{v:1,n:'With agitation'},{v:2,n:'At rest'}]},
+  {id:'croupRet',label:'Retractions',opts:[{v:0,n:'None'},{v:1,n:'Mild'},{v:2,n:'Moderate'},{v:3,n:'Severe'}]},
+  {id:'croupAir',label:'Air Entry',opts:[{v:0,n:'Normal'},{v:1,n:'Decreased'},{v:2,n:'Severely ↓'}]},
+  {id:'croupCya',label:'Cyanosis',opts:[{v:0,n:'None'},{v:4,n:'With agitation'},{v:5,n:'At rest'}]},
+  {id:'croupLOC',label:'Level of Consciousness',opts:[{v:0,n:'Normal'},{v:5,n:'Altered'}]},
+];
+function croupScore(){return croupStr+croupRet+croupAir+croupCya+croupLOC;}
+function openCroup(){document.getElementById('croupModal').classList.add('open');renderCroup();}
+function closeCroup(e){if(e&&e.target!==document.getElementById('croupModal'))return;document.getElementById('croupModal').classList.remove('open');updateToolsBar();}
+function renderCroup(){
+  let h='';
+  const self=this;
+  for(const comp of CROUP_COMPONENTS){
+    const curVal=comp.id==='croupStr'?croupStr:comp.id==='croupRet'?croupRet:comp.id==='croupAir'?croupAir:comp.id==='croupCya'?croupCya:croupLOC;
+    h+=`<div class="croup-item"><div class="croup-label">${comp.label}</div><div class="croup-ops">`;
+    for(const o of comp.opts){
+      h+=`<div class="croup-opt${o.v===curVal?' on':''}" data-comp="${comp.id}" data-v="${o.v}">${o.n}<br><span style="font-size:.55rem;color:${o.v===curVal?'rgba(255,255,255,.7)':'#666'}">+${o.v}</span></div>`;
+    }
+    h+=`</div></div>`;
+  }
+  document.getElementById('croupGrid').innerHTML=h;
+  const sc=croupScore();
+  let sev=sc<=2?'Mild (≤2)':sc<=7?'Moderate (3–7)':'Severe (≥8) — impending respiratory failure';
+  document.getElementById('croupTotal').textContent=sc;
+  document.getElementById('croupSev').textContent=sev;
+  document.querySelectorAll('.croup-opt').forEach(b=>b.addEventListener('click',function(){
+    const comp=this.dataset.comp,v=parseInt(this.dataset.v);
+    if(comp==='croupStr')croupStr=v;else if(comp==='croupRet')croupRet=v;
+    else if(comp==='croupAir')croupAir=v;else if(comp==='croupCya')croupCya=v;else croupLOC=v;
+    renderCroup();
+  }));
+}
+
+// ==================== BURNS ====================
+const BURN_ZONES=[
+  {id:'head',label:'Head / Neck',pct:18},
+  {id:'rArm',label:'Right Arm',pct:9},
+  {id:'lArm',label:'Left Arm',pct:9},
+  {id:'chest',label:'Chest / Abdomen',pct:18},
+  {id:'back',label:'Back / Buttocks',pct:18},
+  {id:'rLeg',label:'Right Leg',pct:13.5},
+  {id:'lLeg',label:'Left Leg',pct:13.5},
+  {id:'peri',label:'Perineum',pct:1},
+];
+function burnTotal(){
+  let t=0;
+  for(const z of BURN_ZONES)t+=(burnZones[z.id]/100)*z.pct;
+  return Math.round(t*10)/10;
+}
+function openBurn(){document.getElementById('burnModal').classList.add('open');renderBurn();}
+function closeBurn(e){if(e&&e.target!==document.getElementById('burnModal'))return;document.getElementById('burnModal').classList.remove('open');updateToolsBar();}
+function renderBurn(){
+  let h='';
+  for(const z of BURN_ZONES){
+    const pct=burnZones[z.id];
+    const contrib=Math.round((pct/100)*z.pct*10)/10;
+    h+=`<div class="burn-row">
+      <span class="burn-label">${z.label}<span class="burn-bodypct">(${z.pct}%)</span></span>
+      <input type="range" class="burn-slider" data-zone="${z.id}" value="${pct}" min="0" max="100" step="5">
+      <span class="burn-result">${pct>0?contrib+'%':'-'}</span>
+    </div>`;
+  }
+  document.getElementById('burnGrid').innerHTML=h;
+  const bt=burnTotal();
+  document.getElementById('burnTotal').textContent=bt+'% TBSA';
+  // Parkland formula: 4 mL × kg × %TBSA = total mL first 24h
+  if(bt>0){
+    const parklandTotal=Math.round(4*kg*bt);
+    const first8=Math.round(parklandTotal/2);
+    const first8rate=Math.round(first8/8);
+    const next16rate=Math.round((parklandTotal-first8)/16);
+    document.getElementById('parklandCalc').innerHTML=`
+      <div style="font-weight:700;color:#7c8cf8;margin-bottom:4px">💧 Parkland Formula</div>
+      <div>4 mL × ${kg} kg × ${bt}% = <b style="color:#fff">${parklandTotal} mL</b> / 24hr</div>
+      <div style="margin-top:3px;font-size:.62rem;color:#888">
+        First 8 hr: <b style="color:#fff">${first8rate} mL/hr</b> (${first8} mL total)<br>
+        Next 16 hr: <b style="color:#fff">${next16rate} mL/hr</b> (${parklandTotal-first8} mL total)<br>
+        Use LR. Start from time of burn, not arrival.
+      </div>`;
+  } else {
+    document.getElementById('parklandCalc').innerHTML='<span style="color:#555">Select zones above to calculate fluid resuscitation</span>';
+  }
+  document.querySelectorAll('.burn-slider').forEach(s=>s.addEventListener('input',function(){
+    burnZones[this.dataset.zone]=parseInt(this.value);
+    renderBurn();
+  }));
+}
+
+// ==================== CODE SHEET ====================
+function openSheet(){
+  document.getElementById('sheetModal').classList.add('open');
+  const[al,ah]=estAgeFromWt(kg);const ay=(al+ah)/2;const br=findBroselow(kg);
+  const vt=getVitals(ay);const eq=getEquip(kg,ay);
+  const bol=Math.round(kg*20);
+  const m4=Math.min(kg,10)*4,m2=kg>10?Math.min(kg-10,10)*2:0,m1=kg>20?(kg-20)*1:0;
+  const mnt=Math.round(m4+m2+m1);
+  const c1=Math.round(kg*1),c2=Math.round(kg*2),d1=Math.round(kg*2),d2=Math.round(kg*4);
+
+  function dr(d){return fmtDR(d.lo,d.hi,d.u,kg,d.mx,d.mu,d.mn,d.fixed);}
+  function r(label,val,cls){cls=cls||'sr';return `<div class="sheet-r"><span class="sl">${label}</span><span class="${cls}">${val}</span></div>`;}
+
+  const inductionDrugs=MEDS.find(m=>m.title.includes('RSI — Induction'));
+  const rsiDrugs=MEDS.find(m=>m.title.includes('RSI — Paralysis'));
+  const resusDrugs=MEDS.find(m=>m.title==='Resuscitation');
+
+  // Build RSI column - compact, no descriptions, just essential doses
+  let rsiCol='';
+  for(const d of inductionDrugs.drugs)rsiCol+=r(d.n,dr(d));
+  if(rsiDrugs)for(const d of rsiDrugs.drugs)rsiCol+=r(d.n,dr(d));
+
+  // Build Resus column - condensed, one-line entries with key info only
+  let resusCol='';
+  const keyResus=['Epinephrine','Amiodarone','Lidocaine','Adenosine (1st)','Adenosine (2nd)','Atropine','Naloxone','Calcium Chloride','Magnesium Sulfate','Sodium Bicarbonate','Dextrose (D10W)'];
+  for(const d of resusDrugs.drugs){
+    const matchedKey=keyResus.find(k=>d.n.includes(k));
+    if(matchedKey){
+      if(matchedKey==='Epinephrine'&&d.sub.includes('arrest')&&!d.sub.includes('ET')){
+        resusCol+=r('Epi IV',dr(d));
+      } else if(matchedKey==='Epinephrine'&&d.sub.includes('ET')){
+        resusCol+=r('Epi ET',dr(d));
+      } else if(matchedKey==='Atropine'&&d.sub.includes('brady')){
+        resusCol+=r('Atropine',dr(d));
+      } else if(matchedKey==='Atropine'&&d.sub.includes('ET')){
+        resusCol+=r('Atropine ET',dr(d));
+      } else if(matchedKey==='Adenosine (1st)'){
+        resusCol+=r('Adenos 1st',dr(d));
+      } else if(matchedKey==='Adenosine (2nd)'){
+        resusCol+=r('Adenos 2nd',dr(d));
+      } else if(matchedKey==='Calcium Chloride'){
+        resusCol+=r('CaCl',dr(d));
+      } else if(matchedKey==='Magnesium Sulfate'){
+        resusCol+=r('MagSO4',dr(d));
+      } else if(matchedKey==='Sodium Bicarbonate'){
+        resusCol+=r('Bicarb',dr(d));
+      } else if(matchedKey==='Dextrose (D10W)'){
+        resusCol+=r('Dextrose D10',dr(d));
+      } else if(matchedKey==='Amiodarone'){
+        resusCol+=r('Amio',dr(d));
+      } else if(matchedKey==='Lidocaine'){
+        resusCol+=r('Lido',dr(d));
+      } else {
+        resusCol+=r(d.n,dr(d));
+      }
+    }
+  }
+  resusCol+=r('Cardiovert',c1+'/'+c2+'J');
+  resusCol+=r('Defib',d1+'/'+d2+'J');
+
+  // Build equipment row
+  let equipRow=r('ETT',eq.ec+' mm · Depth '+eq.ed+' cm · '+eq.b)+r('Suction',eq.su)+r('LMA',eq.lma)+r('Chest Tube',eq.ct)+r('Foley',eq.foley)+r('NG/OG',eq.ng)+r('TV · Rate',eq.tvl+'-'+eq.tvh+'ml · '+eq.rr+'/min');
+
+  let h=`<div class="sheet-tight">
+    <div class="sheet-hdr"><span class="sht">🩺 PediRef Code Sheet</span><br><span class="shs">${kg} kg · ${br.c} · HR ${vt.hr[0]}-${vt.hr[1]} · RR ${vt.rr[0]}-${vt.rr[1]} · SBP ${vt.sbp[0]}-${vt.sbp[1]} · Age ~${Math.round(ageYr*10)/10}yr · Len ${br.lenLo}-${br.lenHi}cm</span></div>
+    <div class="sheet-row sheet-row-3">
+      <div class="sheet-card sheet-col-narrow">
+        <div class="alg-h">⚡ RSI</div>
+        <div class="alg-body"><div>${rsiCol}</div></div>
+      </div>
+      <div class="sheet-card sheet-col-narrow">
+        <div class="alg-h">🔧 Equipment</div>
+        <div class="alg-body"><div>${equipRow}</div></div>
+      </div>
+      <div class="sheet-card sheet-col-narrow">
+        <div class="alg-h">💧 Fluids · Defib</div>
+        <div class="alg-body"><div>${r('Bolus 20ml/kg',bol+' ml')}${r('Maint',mnt+' ml/hr')}${r('Defib',d1+'/'+d2+' J')}${r('Synch CV',c1+'/'+c2+' J')}</div></div>
+      </div>
+    </div>
+    <div class="sheet-card">
+      <div class="alg-h">💉 Resuscitation Meds</div>
+      <div class="alg-body"><div class="sheet-grid sheet-2col">${resusCol}</div></div>
+    </div>
+    <div class="sheet-full alg-card">
+      <h5 class="alg-h">🫀 PALS Cardiac Arrest</h5>
+      <div class="alg-body">
+        <div class="alg-trigger">⚡ PULSELESS · CPR · O₂ · Monitor/Defib · IV/IO → <b>Rhythm check</b></div>
+        <div class="alg-grid">
+          <div class="alg-col shock">
+            <div class="alg-title shock-t">VF / pVT (Shockable)</div>
+            <div class="alg-step">① Shock <b>${d1} J</b></div>
+            <div class="alg-step">② CPR 2 min · Epi <b>${fmtDR(.01,.01,'mg/kg',kg,1,'mg')}</b></div>
+            <div class="alg-step">③ Epi q3-5 min</div>
+            <div class="alg-step">④ Shock <b>${d2} J</b></div>
+            <div class="alg-step">⑤ Amio <b>${fmtDR(5,5,'mg/kg',kg,300,'mg')}</b> / Lido <b>${fmtDR(1,1,'mg/kg',kg,100,'mg')}</b></div>
+          </div>
+          <div class="alg-col nonshock">
+            <div class="alg-title nonshock-t">Asystole / PEA (Non-Shockable)</div>
+            <div class="alg-step">① Epi <b>${fmtDR(.01,.01,'mg/kg',kg,1,'mg')}</b> ASAP</div>
+            <div class="alg-step">② CPR 2 min · Epi q3-5 min</div>
+            <div class="alg-step">③ Advanced airway</div>
+            <div class="alg-step">④ Capnography</div>
+          </div>
+        </div>
+        <div class="alg-footer"><b>Both:</b> Treat H's & T's · Hypovolemia · Hypoxia · H⁺ · Hypo/HyperK⁺ · Hypothermia · Tamponade · Tension PTX · Toxins · Thrombosis</div>
+      </div>
+    </div>
+    <div class="sheet-grid">
+      <div class="sheet-col alg-card">
+        <h5 class="alg-h">🫀 Bradycardia</h5>
+        <div class="alg-body single">
+          <div class="alg-trigger">⚠️ HR &lt;60 + poor perfusion despite O₂/vent</div>
+          <div class="alg-step">① CPR</div>
+          <div class="alg-step">② Epi <b>${fmtDR(.01,.01,'mg/kg',kg,1,'mg')}</b> IV/IO q3-5 min</div>
+          <div class="alg-step">③ Atropine <b>${fmtDR(.02,.02,'mg/kg',kg)}</b> (if vagal/AV block, ×1)</div>
+          <div class="alg-step">④ Transcutaneous pacing</div>
+          <div class="alg-step">⑤ Treat H's & T's</div>
+        </div>
+      </div>
+      <div class="sheet-col alg-card">
+        <h5 class="alg-h">⚡ Tachycardia</h5>
+        <div class="alg-body">
+          <div class="alg-trigger">⚠️ Tachy + pulse + poor perfusion</div>
+          <div class="alg-subhead narrow">Narrow QRS ≤0.09s (SVT)</div>
+          <div class="alg-step sm">① Vagal maneuver</div>
+          <div class="alg-step sm">② Adenosine <b>${fmtDR(.1,.1,'mg/kg',kg,6,'mg')}</b> RAPID</div>
+          <div class="alg-step sm">③ Adenosine <b>${fmtDR(.2,.2,'mg/kg',kg,12,'mg')}</b></div>
+          <div class="alg-step sm">④ Synch CV <b>${c1}–${c2} J</b></div>
+          <div class="alg-subhead wide">Wide QRS &gt;0.09s (VT)</div>
+          <div class="alg-step sm">① Synch CV <b>${c1}–${c2} J</b></div>
+          <div class="alg-step sm">② Adenosine? (if regular/monomorphic)</div>
+          <div class="alg-step sm">③ Amio <b>${fmtDR(5,5,'mg/kg',kg,300,'mg')}</b> over 20-60 min</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('sheetPreview').innerHTML=h;
+  document.getElementById('sheetPrint').innerHTML=h;
+}
+function closeSheet(e){
+  if(e&&e.target!==document.getElementById('sheetModal'))return;
+  document.getElementById('sheetModal').classList.remove('open');
+}
+function printSheet(){
+  window.print();
+}
+
+function updateToolsBar(){
+  document.getElementById('tbGCS').textContent=gcsScore();
+  const cs=croupScore();
+  document.getElementById('tbCroup').textContent=cs>0?cs:'–';
+  const bt=burnTotal();
+  document.getElementById('tbBurn').textContent=bt>0?bt+'%':'–';
+}
+
+// ==================== RENDER ====================
+function renderAll(){
+  document.getElementById('gcsNum').textContent=gcsScore();
+  updateToolsBar();
+  const[al,ah]=estAgeFromWt(kg);const ay=(al+ah)/2;const br=findBroselow(kg);
+  const vt=getVitals(ay);const eq=getEquip(kg,ay);
+  const ageLabels=['Newborn','2-6mo','6-12mo','1-2yr','2-3yr','3-5yr','5-9yr','9-13yr','13+ yr'];
+  const ai2=BROSLOW.indexOf(br);
+  ae.innerHTML=`📏 Est. age: <b>${ageLabels[ai2]||'—'}</b> · Broselow: <b style="color:${brColors[br.c]||'#fff'}">${br.c}</b> · Length: ${br.lenLo}–${br.lenHi} cm`;
+
+  // Chip selection
+  bs.querySelectorAll('.chip').forEach(c=>c.classList.toggle('sel',c.dataset.c===br.c));
+  const bchip=bs.querySelector(`[data-c="${br.c}"]`);if(bchip)bchip.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+
+  let h='';
+
+  // Vitals
+  h+=`<div class="sect collapsed" id="sv"><div class="sect-head" onclick="tg('sv')"><span class="emoji">💓</span> Vital Signs<span class="arr">▾</span></div><div class="sect-body">`+
+    `<div class="vrow"><span class="vlabel">Heart Rate</span><span class="vval">${vt.hr[0]}–${vt.hr[1]}</span><span class="vrange">/min</span></div>`+
+    `<div class="vrow"><span class="vlabel">Resp Rate</span><span class="vval">${vt.rr[0]}–${vt.rr[1]}</span><span class="vrange">/min</span></div>`+
+    `<div class="vrow"><span class="vlabel">Systolic BP</span><span class="vval">${vt.sbp[0]}–${vt.sbp[1]}</span><span class="vrange">mmHg</span></div>`+
+    `</div></div>`;
+
+  // Meds
+  let si=0;
+  for(const sec of MEDS){
+    const sid='sm'+si;si++;
+    h+=`<div class="sect collapsed" id="${sid}"><div class="sect-head" onclick="tg('${sid}')"><span class="emoji">${sec.emoji}</span> ${sec.title}<span class="arr">▾</span></div><div class="sect-body">`;
+    for(const d of sec.drugs){
+      const doseStr=fmtDR(d.lo,d.hi,d.u,kg,d.mx,d.mu,d.mn,d.fixed);
+      const volStr=d.fixed?'':calcVol(d.lo,d.hi,kg,d.c,d.mx);
+      h+=`<div class="drug">`+
+        `<div class="drug-name">${d.n}${d.sub?' — <span style="font-weight:400;color:#aaa">'+d.sub+'</span>':''}<span class="routes">${d.r}</span></div>`+
+        `<div class="drug-dose">${doseStr}</div>`+
+        (volStr?`<div class="drug-vol">${volStr} of ${d.c}</div>`:(d.c?`<div class="drug-vol">${d.c}</div>`:''))+
+        (d.note?`<div class="drug-note">${d.note}</div>`:'')+
+        (d.mx!==undefined?`<div class="drug-note">Max: ${d.mx} ${d.mu||d.u.replace('/kg','')}</div>`:'')+
+        (d.mn!==undefined&&d.mn>0?`<div class="drug-note">Min: ${d.mn} ${d.mu||d.u.replace('/kg','')}</div>`:'')+
+        `</div>`;
+    }
+    h+=`</div></div>`;
+  }
+
+  // Equipment
+  h+=`<div class="sect collapsed" id="seq"><div class="sect-head" onclick="tg('seq')"><span class="emoji">🔧</span> Equipment & Airway<span class="arr">▾</span></div><div class="sect-body">`+
+    `<div class="erow"><span class="elabel">ETT Cuffed (preferred)</span><span class="eval">${eq.ec} mm</span></div>`+
+    `<div class="erow"><span class="elabel">ETT Uncuffed</span><span class="eval">${eq.eu} mm</span></div>`+
+    `<div class="erow"><span class="elabel">ETT Depth (at lips)</span><span class="eval">${eq.ed} cm</span></div>`+
+    `<div class="erow"><span class="elabel">Laryngoscope Blade</span><span class="eval">${eq.b}</span></div>`+
+    `<div class="erow"><span class="elabel">Suction Catheter</span><span class="eval">${eq.su}</span></div>`+
+    `<div class="erow"><span class="elabel">LMA Size</span><span class="eval">${eq.lma}</span></div>`+
+    `<div class="erow"><span class="elabel">Tidal Volume</span><span class="eval">${eq.tvl}–${eq.tvh} ml (6–10 ml/kg)</span></div>`+
+    `<div class="erow"><span class="elabel">Vent Rate</span><span class="eval">${eq.rr}/min</span></div>`+
+    `<div class="subhead">Other Equipment</div>`+
+    `<div class="erow"><span class="elabel">Chest Tube</span><span class="eval">${eq.ct}</span></div>`+
+    `<div class="erow"><span class="elabel">Foley Catheter</span><span class="eval">${eq.foley}</span></div>`+
+    `<div class="erow"><span class="elabel">NG / OG Tube</span><span class="eval">${eq.ng}</span></div>`+
+    `</div></div>`;
+
+  // Fluids
+  const bol=Math.round(kg*20);
+  const m4=Math.min(kg,10)*4,m2=kg>10?Math.min(kg-10,10)*2:0,m1=kg>20?(kg-20)*1:0;
+  const mnt=Math.round(m4+m2+m1);
+  h+=`<div class="sect collapsed" id="sfl"><div class="sect-head" onclick="tg('sfl')"><span class="emoji">💧</span> Fluids<span class="arr">▾</span></div><div class="sect-body">`+
+    `<div class="erow"><span class="elabel">Crystalloid Bolus (20 ml/kg)</span><span class="eval">${bol} ml</span></div>`+
+    `<div class="erow"><span class="elabel">Maintenance Rate (4-2-1)</span><span class="eval">${mnt} ml/hr</span></div>`+
+    `</div></div>`;
+
+  // Defib
+  const c1=Math.round(kg*1),c2=Math.round(kg*2),d1=Math.round(kg*2),d2=Math.round(kg*4);
+  h+=`<div class="sect collapsed" id="sdf"><div class="sect-head" onclick="tg('sdf')"><span class="emoji">⚡</span> Defibrillation / Cardioversion<span class="arr">▾</span></div><div class="sect-body">`+
+    `<div class="erow"><span class="elabel">Cardioversion 1st (1 J/kg)</span><span class="eval">${c1} J</span></div>`+
+    `<div class="erow"><span class="elabel">Cardioversion 2nd (2 J/kg)</span><span class="eval">${c2} J</span></div>`+
+    `<div class="erow"><span class="elabel">Defibrillation 1st (2 J/kg)</span><span class="eval">${d1} J</span></div>`+
+    `<div class="erow"><span class="elabel">Defibrillation 2nd (4 J/kg)</span><span class="eval">${d2} J</span></div>`+
+    `</div></div>`;
+
+  rs.innerHTML=h;
+}
+
+function tg(id){document.getElementById(id).classList.toggle('collapsed');}
+
+// Init
+wi.value=kg;ai.value=ageYr;au.value='yr';hi.value=heightCm;
+renderAll();
+
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
