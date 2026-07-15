@@ -1,5 +1,5 @@
-// PediRef v13 — updated 2026-07-14 (audit moderate fixes: atropine brady/pretreart notes, epi arrest note "per-dose max")
-const CACHE = 'pediref-v13';
+// PediRef v14 — updated 2026-07-14 (audit uncertain quick wins: etomidate sepsis softening, dextrose 5/2/1 rule)
+const CACHE = 'pediref-v14';
 const ASSETS = [
   '/',
   '/index.html',
