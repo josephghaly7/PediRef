@@ -1,5 +1,5 @@
-// PediRef v12 — updated 2026-07-14 (audit fixes: phenylephrine, atropine ET, midazolam maxes, ranitidine deleted, gentamicin cap, ceftriaxone meningitis max, route additions)
-const CACHE = 'pediref-v12';
+// PediRef v13 — updated 2026-07-14 (audit moderate fixes: atropine brady/pretreart notes, epi arrest note "per-dose max")
+const CACHE = 'pediref-v13';
 const ASSETS = [
   '/',
   '/index.html',

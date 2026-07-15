@@ -417,7 +417,7 @@ const VITALS = [
 
 const MEDS = [
 {title:'RSI — Pretreatment',emoji:'💉',drugs:[
-  {n:'Atropine',sub:'Bradycardia / <1 yr',lo:.01,hi:.02,u:'mg/kg',r:'IV/IO',c:'0.1 mg/ml',note:'Per 2025 AHA PALS: 0.02 mg/kg, no minimum dose for pretreatment. May repeat once.'},
+  {n:'Atropine',sub:'Bradycardia / <1 yr',lo:.01,hi:.02,u:'mg/kg',r:'IV/IO',c:'0.1 mg/ml',mn:.1,note:'Per 2025 AHA PALS: 0.02 mg/kg. Min 0.1 mg, max single dose 0.5 mg. May repeat once.'},
   {n:'Lidocaine',sub:'↑ICP',lo:1,hi:1.5,u:'mg/kg',r:'IV/IO',c:'20 mg/ml (2%)',mx:100,mu:'mg',note:'Give 2-3 min before laryngoscopy. Blunts ICP rise.'},
   {n:'Fentanyl',sub:'Blunt sympathetic',lo:1,hi:3,u:'mcg/kg',r:'IV/IO',c:'50 mcg/ml',mx:100,mu:'mcg',note:'Give over 1-2 min. Watch for chest wall rigidity.'},
 ]},
@@ -442,13 +442,13 @@ const MEDS = [
   {n:'Ketamine',sub:'Sedation/analgesia',lo:.5,hi:2,u:'mg/kg/hr',r:'IV',c:'100 mg/ml',note:'Infusion. Bronchodilator. Emergence phenomena.'},
 ]},
 {title:'Resuscitation',emoji:'⚡',drugs:[
-  {n:'Epinephrine',sub:'Cardiac arrest',lo:.01,hi:.01,u:'mg/kg',r:'IV/IO',c:'1:10,000 (0.1 mg/ml)',mx:1,mu:'mg',note:'Repeat q3-5 min. No maximum in arrest.'},
+  {n:'Epinephrine',sub:'Cardiac arrest',lo:.01,hi:.01,u:'mg/kg',r:'IV/IO',c:'1:10,000 (0.1 mg/ml)',mx:1,mu:'mg',note:'Repeat q3-5 min. Per-dose max 1 mg.'},
   {n:'Epinephrine',sub:'Cardiac arrest (ET)',lo:.1,hi:.1,u:'mg/kg',r:'ET',c:'1:1,000 (1 mg/ml)',mx:10,mu:'mg',note:'PALS 2025: 0.1 mg/kg. Dilute in 3-5 ml NS. IV/IO strongly preferred over ET.'},
   {n:'Amiodarone',sub:'VF/pVT',lo:5,hi:5,u:'mg/kg',r:'IV/IO',c:'50 mg/ml',mx:300,mu:'mg',note:'Max 300 mg 1st dose, 150 mg 2nd. For shock-refractory VF/pVT.'},
   {n:'Lidocaine',sub:'VF/pVT (2nd line)',lo:1,hi:1,u:'mg/kg',r:'IV/IO',c:'20 mg/ml (2%)',mx:100,mu:'mg',note:'Alternative to amiodarone for VF/pVT.'},
   {n:'Adenosine (1st)',sub:'SVT',lo:.1,hi:.1,u:'mg/kg',r:'IV',c:'3 mg/ml',mx:6,mu:'mg',note:'RAPID push (1-2 sec) followed by immediate flush. Proximal IV preferred.'},
   {n:'Adenosine (2nd)',sub:'SVT — if 1st fails',lo:.2,hi:.2,u:'mg/kg',r:'IV',c:'3 mg/ml',mx:12,mu:'mg',note:'Double the 1st dose. RAPID push + flush.'},
-  {n:'Atropine',sub:'Symptomatic brady',lo:.02,hi:.02,u:'mg/kg',r:'IV/IO',c:'0.1 mg/ml',mn:.1,mx:.5,mu:'mg',note:'Min 0.1 mg. Max 0.5 mg (<40 kg), 1 mg (>40 kg).'},
+  {n:'Atropine',sub:'Symptomatic brady',lo:.02,hi:.02,u:'mg/kg',r:'IV/IO',c:'0.1 mg/ml',mn:.1,mx:.5,mu:'mg',note:'Min 0.1 mg. Max single dose 0.5 mg (all weights). Higher doses for organophosphate poisoning.'},
   {n:'Atropine',sub:'Brady (ET)',lo:.04,hi:.06,u:'mg/kg',r:'ET',c:'0.4 mg/ml',note:'If no IV/IO access. PALS 2025.'},
   {n:'Naloxone',sub:'Opioid reversal',lo:.01,hi:.1,u:'mg/kg',r:'IV/IO/IM/IN',c:'0.4 mg/ml',mx:2,mu:'mg',note:'Titrate to respiratory drive. Lower end for chronic opioid to avoid withdrawal.'},
   {n:'Calcium Chloride',sub:'HyperK⁺ / CCB OD',lo:20,hi:20,u:'mg/kg',r:'IV/IO',c:'100 mg/ml (10%)',mx:1000,mu:'mg',note:'Give slowly. Central line preferred. Extravasation risk.'},
