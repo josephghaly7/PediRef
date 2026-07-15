@@ -1,5 +1,5 @@
-// PediRef v11 — updated 2026-07-14T12:00:00Z
-const CACHE = 'pediref-v11';
+// PediRef v12 — updated 2026-07-14 (audit fixes: phenylephrine, atropine ET, midazolam maxes, ranitidine deleted, gentamicin cap, ceftriaxone meningitis max, route additions)
+const CACHE = 'pediref-v12';
 const ASSETS = [
   '/',
   '/index.html',
