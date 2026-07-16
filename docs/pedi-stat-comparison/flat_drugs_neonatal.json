@@ -1,0 +1,159 @@
+[
+  {
+    "category": "Emergency Medications",
+    "subcategory": "all",
+    "name": "Epinephrine 0.1 mg/mL (1:10,000) IV/IO",
+    "info": [
+      "0.01-0.03 mg/kg (0.1-0.3 mL/kg)"
+    ],
+    "brand": "",
+    "range1": "0.01",
+    "range2": "0.03",
+    "unit": "mg",
+    "formula": "0.01-0.03 mg/kg",
+    "max": "1",
+    "rangeUnit": "mg/kg",
+    "volumes": [
+      {
+        "value": "0.1",
+        "unit": "mL",
+        "formula": "0.1 mg/mL",
+        "multipliers": [
+          "dose"
+        ]
+      }
+    ],
+    "segments": [
+      "0.01",
+      "0.02",
+      "0.03"
+    ]
+  },
+  {
+    "category": "Emergency Medications",
+    "subcategory": "all",
+    "name": "Crystalloids IV",
+    "info": [
+      "10-20 mL/kg"
+    ],
+    "brand": "",
+    "range1": "10",
+    "range2": "20",
+    "unit": "mL",
+    "formula": "10-20  mL/kg",
+    "max": "",
+    "rangeUnit": "ml/kg",
+    "volumes": [],
+    "segments": []
+  },
+  {
+    "category": "Emergency Medications",
+    "subcategory": "all",
+    "name": "Dextrose IV/IO ",
+    "info": [
+      "250 mg/kg or 2.5 mL/kg"
+    ],
+    "brand": "D10",
+    "range1": "2.5",
+    "range2": "",
+    "unit": "mL",
+    "formula": "2.5 mL/Kg",
+    "max": "",
+    "rangeUnit": "",
+    "volumes": [],
+    "segments": []
+  },
+  {
+    "category": "Emergency Medications",
+    "subcategory": "all",
+    "name": "PGE / Alprostadil",
+    "info": [
+      "\u25cf 0.05-0.2 mcg/kg/min when concerned about a closing PDA. \u25cf Monitor for apnea / hypotension."
+    ],
+    "brand": "",
+    "range1": "0.05",
+    "range2": "0.2",
+    "unit": "mcg/min",
+    "formula": "0.05-0.2 mcg/kg/min",
+    "max": "",
+    "rangeUnit": "mcg/kg/min",
+    "volumes": [],
+    "segments": []
+  },
+  {
+    "category": "Emergency Medications",
+    "subcategory": "all",
+    "name": "Ampicillin",
+    "info": [
+      "50-100 mg/kg q12 hours IV"
+    ],
+    "brand": "",
+    "range1": "50",
+    "range2": "100",
+    "unit": "mg",
+    "formula": "50-100 mg/kg",
+    "max": "",
+    "rangeUnit": "mg/kg",
+    "volumes": [],
+    "segments": [
+      "50",
+      "75",
+      "100"
+    ]
+  },
+  {
+    "category": "Emergency Medications",
+    "subcategory": "all",
+    "name": "Gentamicin",
+    "info": [
+      "\u25cf IF > 1 kg: 3 mg/kg q12 hours",
+      "\u25cf IF < 1 kg: 3 mg/kg q 48 hours"
+    ],
+    "brand": "",
+    "range1": "3",
+    "range2": "",
+    "unit": "mg",
+    "formula": "3 mg/kg",
+    "max": "",
+    "rangeUnit": "",
+    "volumes": [],
+    "segments": []
+  },
+  {
+    "category": "Emergency Medications",
+    "subcategory": "all",
+    "name": "Cefotaxime",
+    "info": [
+      "50 mg/kg q8 hours"
+    ],
+    "brand": "",
+    "range1": "50",
+    "range2": "",
+    "unit": "mg",
+    "formula": "50 mg/kg",
+    "max": "",
+    "rangeUnit": "",
+    "volumes": [],
+    "segments": []
+  },
+  {
+    "category": "Emergency Medications",
+    "subcategory": "all",
+    "name": "Vitamin K",
+    "info": [
+      "\u25cf 0.5 - 1 mg IM (single dose)"
+    ],
+    "brand": "",
+    "range1": "0.5",
+    "range2": "1",
+    "unit": "mg",
+    "formula": "0.5-1 mg IM",
+    "max": "",
+    "rangeUnit": "mg",
+    "volumes": [],
+    "segments": [
+      "0.5",
+      "1"
+    ]
+  }
+]

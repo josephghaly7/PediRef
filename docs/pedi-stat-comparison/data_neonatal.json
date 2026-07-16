@@ -1,0 +1,1093 @@
+{
+  "categories": [
+    {
+      "name": "Vital Signs",
+      "subCategories": [
+        {
+          "name": "all",
+          "items": [
+            {
+              "name": "Heart Rate",
+              "formula": "",
+              "vals": "",
+              "information": [
+                "Preterm: 141-172",
+                "Neonate: 95-170"
+              ]
+            },
+            {
+              "name": "Respiratory Rate",
+              "formula": "",
+              "vals": "",
+              "information": [
+                "Preterm: 40-70",
+                "Neonate: 30-50"
+              ]
+            },
+            {
+              "name": "Systolic Blood Pressure",
+              "formula": "",
+              "vals": "",
+              "information": [
+                "Preterm: 40-60",
+                "Neonate: 50-90"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Neonatal Resuscitation",
+      "subCategories": [
+        {
+          "name": "all",
+          "items": [
+            {
+              "name": "Notes:",
+              "notes": [
+                "for use with known patient weight.  If weight is not known, refer to GESTATIONAL AGE ESTIMATES for weight and medication dosing"
+              ]
+            },
+            {
+              "name": "1.) Term Gestation? Good Tone? Breathing / Crying?",
+              "steps": [
+                {
+                  "algostep": "Yes?",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Warm / maintain temperature, dry with towels, position airway, place infant on mother's chest.  Continue to assess",
+                  "title": false
+                },
+                {
+                  "algostep": "NO?",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf  if infant is NOT term, does NOT have good tone, NOT breathing or crying:",
+                  "title": false
+                },
+                {
+                  "algostep": "Warming:",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Initial priority is to warm infant, position airway, and stimulate",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf Target temperature 36.5-37.5  deg C axillary\nUse infant warmer (25 deg C),\nthermal mattress, or heated blankets",
+                  "title": false
+                },
+                {
+                  "algostep": "Position Airway:",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf roll under shoulders - head in neutral / slightly extended position (align auditory meatus with suprasternal notch)",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf use jaw thrust or place oral / nasal airway to minimize obstruction",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf suctioning NOT recommended unless complete airway obstruction",
+                  "title": false
+                },
+                {
+                  "algostep": "Stimulation:",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Rub infant's back, flick soles of feet.  Towel drying in infant > 32 weeks provides additional stimulation",
+                  "title": false
+                }
+              ]
+            },
+            {
+              "name": "2.) Cardiorespiratory Assessment",
+              "steps": [
+                {
+                  "algostep": "Labored breathing / persistent cyanosis, but HR > 100:",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Reposition / clear airway,\nJaw thrust\n\u2022Place SpO2 probe to monitor pre-ductal oxygen saturation (Right hand / wrist)",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf Apply supplemental O2 as needed, consider positive pressure ventilation",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf Continue to monitor HR",
+                  "title": false
+                },
+                {
+                  "algostep": "Apneic / Gasping; or HR < 100",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Provide positive pressure ventilation in addition to above steps",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf Target 40 breaths/minute and effective ventilation",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf When possible, provide PPV through T-piece resuscitator or flow-inflating bag",
+                  "title": false
+                },
+                {
+                  "algostep": "\u2022b/CPAP/b - PEEP 5-8; \nPPV - PIP 20, or until chest rise",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf If not improved after 30 seconds, consider:\nmask adjustment, reposition airway, suctioning, opening mouth, increase PEEP to 6-8 and PPV> 20, advanced airway including supraglottic",
+                  "title": false
+                }
+              ]
+            },
+            {
+              "name": "3.) HR < 60?",
+              "steps": [
+                {
+                  "algostep": "Initial Steps",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Intubate / Supraglottic airway\n(Ventilation is priority!)",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf Chest compressions\ncoordinate with ventilations",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf 3:1 (90 compressions : 30 ventilations / minute)",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf recheck pulse / HR every 60 seconds",
+                  "title": false
+                },
+                {
+                  "algostep": "Vascular Access:",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf umbilcal vein catheter preferred \n\u25cf Intraosseous access only for term infants > 3 kg.",
+                  "title": false
+                },
+                {
+                  "algostep": "Epinephrine 0.1 mg/mL (1:10,000) IV/IO",
+                  "title": true
+                },
+                {
+                  "range1": "0.01",
+                  "range2": "0.03",
+                  "unit": "mg",
+                  "label": "",
+                  "formula": "0.01-0.03 mg/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [
+                    {
+                      "value": "0.1",
+                      "unit": "mL",
+                      "formula": "0.1 mg/mL",
+                      "multipliers": [
+                        "dose"
+                      ]
+                    }
+                  ],
+                  "rangeUnit": "mg/kg",
+                  "segments": [
+                    "0.01",
+                    "0.02",
+                    "0.03"
+                  ]
+                },
+                {
+                  "algostep": "Epinephrine 0.1 mg/mL ETT",
+                  "title": true
+                },
+                {
+                  "range1": "0.05",
+                  "range2": "0.1",
+                  "unit": "mg",
+                  "label": "",
+                  "formula": "0.05-0.1 mg/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [
+                    {
+                      "value": "0.1",
+                      "unit": "mL",
+                      "formula": "0.1 mg/mL",
+                      "multipliers": [
+                        "dose"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "algostep": "\u25cf  Enter b/WEIGHT/b using scale icon above  OR\n\u25cf Use b/GESTATIONAL AGE ESTIMATES/b if weight not known ",
+                  "title": false
+                },
+                {
+                  "algostep": "Fluid and Glucose",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Consider fluid bolus NS 10 mL/kg",
+                  "title": false
+                },
+                {
+                  "range1": "10",
+                  "range2": "",
+                  "unit": "mL",
+                  "label": "",
+                  "formula": "10 mL/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": []
+                },
+                {
+                  "algostep": "\u25cf Check blood glucose, consider D10 bolus 2 mL/kg",
+                  "title": false
+                },
+                {
+                  "range1": "2",
+                  "range2": "",
+                  "unit": "mL",
+                  "label": "",
+                  "formula": "D10 2 mL/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": []
+                }
+              ]
+            },
+            {
+              "name": "4.) Resuscitation Goals: (STABLE)",
+              "steps": [
+                {
+                  "algostep": "Sugar",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf check blood glucose, treat hypoglycemia, consider D10 bolus ",
+                  "title": false
+                },
+                {
+                  "algostep": "Temperature",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf 36.5-37.5 deg C",
+                  "title": false
+                },
+                {
+                  "algostep": "Airway",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf positioning, appropriate equipment, supraglottic airway is as good / better than ETT",
+                  "title": false
+                },
+                {
+                  "algostep": "Breathing",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf goal is SpO2 > 90% after 1o minutes.  \n\u25cf Assist ventilation when necessary, consider PPV or advanced airway",
+                  "title": false
+                },
+                {
+                  "algostep": "Labs:",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf evaluate glucose, CO2 for appropriate ventilation, labs for evidence of infection",
+                  "title": false
+                },
+                {
+                  "algostep": "Emotional Support",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf assign staff to provide emotional support for mother and family",
+                  "title": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Gestational Age Estimates",
+      "subCategories": [
+        {
+          "name": "all",
+          "items": [
+            {
+              "name": "Disclaimer and Info",
+              "notes": [
+                "\u25cf Displayed content including weights and dosing are based on gestational age and estimated weight. ",
+                "\u25cf  Confirmation of exact weight is recommended as early as possible.",
+                "\u25cf Laryngoscope blade use size 0 for preterm infants, Size 1 for term infants",
+                "\u25cf LMA size 1 (< 5 kg)",
+                "\u25cf I-Gel size 1 (2-5 kg)",
+                "\u25cf Epinephrine 0.1 mg/mL IV/IO (1:10,000), displayed dosing is 0.02 mg/kg, 0.2 mL/kg (Recommended dose is 0.01-0.03 mg/kg, or 0.1-0.3 mL/kg)",
+                "\u25cf Epinephrine 0.1 mg/ml ETT (1:10,000), displayed dosing is 0.3-1 mL/kg"
+              ]
+            },
+            {
+              "name": "Gestational Age /  Weight",
+              "steps": [
+                {
+                  "algostep": "23-24 weeks",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Est Weight: 500-600 g\n\u25cf ETT size: 2.5\n\u25cf Insertion Depth: 5.5 cm\n\u25cf LMA size 1\n\u25cf Epinephrine IV =  0.01 mg, 0.1 mL\n\u25cf Epinephrine ETT = 0.15-0.5 mL",
+                  "title": false
+                },
+                {
+                  "algostep": "25-26 weeks",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Est Weight: 700-800 g\n\u25cf ETT size: 2.5\n\u25cf Insertion Depth: 6.0 cm\n\u25cf LMA size 1\n\u25cf Epinephrine IV =  0.015 mg, 0.15 mL\n\u25cf Epinephrine ETT = 0.2-0.7 mL",
+                  "title": false
+                },
+                {
+                  "algostep": "27-29 weeks",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Est Weight: 900-1000 g\n\u25cf ETT size: 2.5-3.0\n\u25cf Insertion Depth: 6.0 cm\n\u25cf LMA size 1\n\u25cf Epinephrine IV =  0.02 mg, 0.2 mL\n\u25cf Epinephrine ETT = 0.3-1 mL",
+                  "title": false
+                },
+                {
+                  "algostep": "30-32 weeks",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Est Weight: 1100-1400 g\n\u25cf ETT size: 3.0\n\u25cf Insertion Depth: 7.0 cm\n\u25cf LMA size 1\n\u25cf Epinephrine IV =  0.025 mg, 0.25 mL\n\u25cf Epinephrine ETT = 0.35-1.2 mL",
+                  "title": false
+                },
+                {
+                  "algostep": "33-34 weeks",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Est Weight: 1500-1800 g\n\u25cf ETT size: 3.0\n\u25cf Insertion Depth: 7.5 cm\n\u25cf LMA size 1\n\u25cf Epinephrine IV =  0.03 mg, 0.3 mL\n\u25cf Epinephrine ETT = 0.45-1.5 mL",
+                  "title": false
+                },
+                {
+                  "algostep": "35-37 weeks",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Est Weight: 1900-2400 g\n\u25cf ETT size: 3.5\n\u25cf Insertion Depth: 8.0 cm\n\u25cf LMA size 1\n\u25cf I-Gel size 1\n\u25cf Epinephrine IV =  0.04 mg, 0.4 mL\n\u25cf Epinephrine ETT = 0.6-2 mL",
+                  "title": false
+                },
+                {
+                  "algostep": "38-40 weeks",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Est Weight: 2500-3100 g\n\u25cf ETT size: 3.5-4.0\n\u25cf Insertion Depth: 8.5 cm\n\u25cf Epinephrine IV =  0.05 mg, 0.5 mL\n\u25cf Epinephrine ETT = 0.8-3 mL",
+                  "title": false
+                },
+                {
+                  "algostep": "41-43 weeks",
+                  "title": true
+                },
+                {
+                  "algostep": "\u25cf Est Weight: 3200-4200 g\n\u25cf ETT size: 3.5-4.0\n\u25cf Insertion Depth: 9.0 cm\n\u25cf LMA size 1\n\u25cf I-Gel size 1\n\u25cf Epinephrine IV =  0.06-0.8 mg, 0.6-0.8 mL\n\u25cf Epinephrine ETT = 1-4 mL",
+                  "title": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Emergency Medications",
+      "subCategories": [
+        {
+          "name": "all",
+          "items": [
+            {
+              "name": "Emergency Medications",
+              "notes": [
+                "\u25cf For use with known patient weight"
+              ]
+            },
+            {
+              "name": "Epinephrine 0.1 mg/mL (1:10,000) IV/IO",
+              "information": [
+                "0.01-0.03 mg/kg (0.1-0.3 mL/kg)"
+              ],
+              "dosages": [
+                {
+                  "range1": "0.01",
+                  "range2": "0.03",
+                  "unit": "mg",
+                  "label": "",
+                  "formula": "0.01-0.03 mg/kg",
+                  "max": "1",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [
+                    {
+                      "value": "0.1",
+                      "unit": "mL",
+                      "formula": "0.1 mg/mL",
+                      "multipliers": [
+                        "dose"
+                      ]
+                    }
+                  ],
+                  "rangeUnit": "mg/kg",
+                  "segments": [
+                    "0.01",
+                    "0.02",
+                    "0.03"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Crystalloids IV",
+              "information": [
+                "10-20 mL/kg"
+              ],
+              "dosages": [
+                {
+                  "range1": "10",
+                  "range2": "20",
+                  "unit": "mL",
+                  "label": "\u25cf Weight Based Volume Range:",
+                  "formula": "10-20  mL/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [],
+                  "rangeUnit": "ml/kg"
+                }
+              ]
+            },
+            {
+              "name": "Dextrose IV/IO ",
+              "information": [
+                "250 mg/kg or 2.5 mL/kg"
+              ],
+              "dosages": [
+                {
+                  "range1": "2.5",
+                  "range2": "",
+                  "unit": "mL",
+                  "label": "D10",
+                  "formula": "2.5 mL/Kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [],
+                  "rangeUnit": ""
+                }
+              ],
+              "brand": "D10"
+            },
+            {
+              "name": "PGE / Alprostadil",
+              "information": [
+                "\u25cf 0.05-0.2 mcg/kg/min when concerned about a closing PDA. \u25cf Monitor for apnea / hypotension."
+              ],
+              "dosages": [
+                {
+                  "range1": "0.05",
+                  "range2": "0.2",
+                  "unit": "mcg/min",
+                  "label": "\u25cf Infusion:",
+                  "formula": "0.05-0.2 mcg/kg/min",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [],
+                  "rangeUnit": "mcg/kg/min"
+                }
+              ]
+            },
+            {
+              "name": "Ampicillin",
+              "information": [
+                "50-100 mg/kg q12 hours IV"
+              ],
+              "dosages": [
+                {
+                  "range1": "50",
+                  "range2": "100",
+                  "unit": "mg",
+                  "label": "",
+                  "formula": "50-100 mg/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [],
+                  "rangeUnit": "mg/kg",
+                  "segments": [
+                    "50",
+                    "75",
+                    "100"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Gentamicin",
+              "information": [
+                "\u25cf IF > 1 kg: 3 mg/kg q12 hours",
+                "\u25cf IF < 1 kg: 3 mg/kg q 48 hours"
+              ],
+              "dosages": [
+                {
+                  "range1": "3",
+                  "range2": "",
+                  "unit": "mg",
+                  "label": "",
+                  "formula": "3 mg/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [],
+                  "rangeUnit": ""
+                }
+              ]
+            },
+            {
+              "name": "Cefotaxime",
+              "information": [
+                "50 mg/kg q8 hours"
+              ],
+              "dosages": [
+                {
+                  "range1": "50",
+                  "range2": "",
+                  "unit": "mg",
+                  "label": "",
+                  "formula": "50 mg/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [],
+                  "rangeUnit": ""
+                }
+              ]
+            },
+            {
+              "name": "Vitamin K",
+              "information": [
+                "\u25cf 0.5 - 1 mg IM (single dose)"
+              ],
+              "dosages": [
+                {
+                  "range1": "0.5",
+                  "range2": "1",
+                  "unit": "mg",
+                  "label": "\u25cf Fixed Dose Range:",
+                  "formula": "0.5-1 mg IM",
+                  "max": "",
+                  "multipliers": [],
+                  "volumes": [],
+                  "rangeUnit": "mg",
+                  "segments": [
+                    "0.5",
+                    "1"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Umbilical Catheter ",
+      "subCategories": [
+        {
+          "name": "all",
+          "items": [
+            {
+              "name": "Umbilical Artery Catheter",
+              "steps": [
+                {
+                  "algostep": "\u25cf Single Lumen",
+                  "title": false
+                },
+                {
+                  "algostep": "**2 arteries, 1 vein**\n< 1 kg: use 3.5 FR\n> 1 kg: use 5 FR\n",
+                  "title": false
+                },
+                {
+                  "algostep": "Insertion Depth:",
+                  "title": true
+                },
+                {
+                  "algostep": "(weight[kg] x 3) + 9 = depth (cm)",
+                  "title": false
+                }
+              ]
+            },
+            {
+              "name": "Umbilical Venous Catheter",
+              "steps": [
+                {
+                  "algostep": "\u25cf Double Lumen",
+                  "title": false
+                },
+                {
+                  "algostep": "Insertion Depth:",
+                  "title": true
+                },
+                {
+                  "algostep": "(UAC depth / 2) + 1 = depth (cm)",
+                  "title": false
+                }
+              ]
+            },
+            {
+              "name": "Emergent UVC access",
+              "steps": [
+                {
+                  "algostep": "\u25cf insert 2-4 cm until blood return",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf advance 1 cm and secure",
+                  "title": false
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "premium": false
+    },
+    {
+      "name": "Oxygen Saturation",
+      "subCategories": [
+        {
+          "name": "all",
+          "items": [
+            {
+              "name": "Preductal Oxygen Saturation",
+              "notes": [
+                "\u25cf Targets for preductal oxygen saturation during neonatal resuscitation",
+                "\u25cf Oximeter probe should be placed on right upper extremity (preductal location)"
+              ]
+            },
+            {
+              "name": "Target Preductal Oxygen Saturation",
+              "steps": []
+            },
+            {
+              "name": "1 minutes",
+              "formula": "",
+              "vals": "",
+              "information": [
+                "\u25cf 60-65 %"
+              ]
+            },
+            {
+              "name": "2 minutes",
+              "formula": "",
+              "vals": "",
+              "information": [
+                "\u25cf 65-70%"
+              ]
+            },
+            {
+              "name": "3 minutes",
+              "formula": "",
+              "vals": "",
+              "information": [
+                "\u25cf 70-75%"
+              ]
+            },
+            {
+              "name": "4 minutes",
+              "formula": "",
+              "vals": "",
+              "information": [
+                "\u25cf 75-80%"
+              ]
+            },
+            {
+              "name": "5 minutes",
+              "formula": "",
+              "vals": "",
+              "information": [
+                "\u25cf 80-85%"
+              ]
+            },
+            {
+              "name": "10 minutes",
+              "formula": "",
+              "vals": "",
+              "information": [
+                "\u25cf 90-95%"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "APGAR score",
+      "subCategories": [
+        {
+          "name": "all",
+          "items": []
+        }
+      ]
+    },
+    {
+      "name": "Crashing Neonate DDX",
+      "subCategories": [
+        {
+          "name": "all",
+          "items": [
+            {
+              "name": "\"THE MISFITS\"",
+              "steps": [
+                {
+                  "algostep": "\u25cf Trauma - accidental / non-accidental",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf Heart disease / Hypovolemia",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf Electrolytes",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf Metabolic",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf  Inborn errors of metabolism",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf Sepsis",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf Formula dilution",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf Intestinal catastrophes (intussusception, malrotation, Hirschsprung's disease, volvulus)",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf Toxins",
+                  "title": false
+                },
+                {
+                  "algostep": "\u25cf Seizures",
+                  "title": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Neonatal Seizures",
+      "subCategories": [
+        {
+          "name": "Neonatal Seizure Algorithm",
+          "items": [
+            {
+              "name": "1st Line / Phenobarbital IV",
+              "steps": [
+                {
+                  "range1": "20",
+                  "range2": "",
+                  "unit": "mg/kg",
+                  "label": "Weight Based Dose",
+                  "formula": "20 mg/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [
+                    {
+                      "value": "65",
+                      "unit": "mL",
+                      "formula": "65 mg/mL",
+                      "multipliers": [
+                        "dose"
+                      ],
+                      "decimals": -1
+                    },
+                    {
+                      "value": "130 ",
+                      "unit": "mL",
+                      "formula": "130 mg/mL",
+                      "multipliers": [
+                        "dose"
+                      ]
+                    }
+                  ],
+                  "rangeUnit": "mg"
+                }
+              ]
+            },
+            {
+              "name": "Repeat 1st Line / Phenobarbital IV",
+              "steps": [
+                {
+                  "range1": "10",
+                  "range2": "20",
+                  "unit": "mg/kg",
+                  "label": "Weight Based Dose Range:",
+                  "formula": "10-20 mg/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [
+                    {
+                      "value": "65",
+                      "unit": "mL",
+                      "formula": "65 mg/mL",
+                      "multipliers": [
+                        "dose"
+                      ]
+                    },
+                    {
+                      "value": "130 ",
+                      "unit": "mL",
+                      "formula": "130 mg/mL",
+                      "multipliers": [
+                        "dose"
+                      ]
+                    }
+                  ],
+                  "rangeUnit": "mg",
+                  "segments": [
+                    "10",
+                    "15",
+                    "20"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "2nd Line / Fosphenytoin IV",
+              "steps": [
+                {
+                  "range1": "20",
+                  "range2": "",
+                  "unit": "PE",
+                  "label": "Weight Based Dose:",
+                  "formula": "20 mg PE/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [
+                    {
+                      "value": "50",
+                      "unit": "mL",
+                      "formula": "100 mg PE/2 mL",
+                      "multipliers": [
+                        "dose"
+                      ]
+                    },
+                    {
+                      "value": "50",
+                      "unit": "mL",
+                      "formula": "500 mg PE/10 mL",
+                      "multipliers": [
+                        "dose"
+                      ],
+                      "decimals": -1
+                    }
+                  ],
+                  "rangeUnit": "mg",
+                  "segments": []
+                }
+              ]
+            },
+            {
+              "name": "Repeat 2nd Line / Fosphenytoin IV",
+              "steps": [
+                {
+                  "range1": "20",
+                  "range2": "",
+                  "unit": "mg",
+                  "label": "Weight Based Dose:",
+                  "formula": "20 mg PE/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [
+                    {
+                      "value": "50",
+                      "unit": "mL",
+                      "formula": "100 mg PE/2 mL",
+                      "multipliers": [
+                        "dose"
+                      ]
+                    },
+                    {
+                      "value": "50",
+                      "unit": "mL",
+                      "formula": "500 mg PE/10 mL",
+                      "multipliers": [
+                        "dose"
+                      ]
+                    }
+                  ],
+                  "rangeUnit": "mg",
+                  "segments": []
+                }
+              ]
+            },
+            {
+              "name": "3rd Line / Levetiracetam IV",
+              "steps": [
+                {
+                  "range1": "60",
+                  "range2": "",
+                  "unit": "mg",
+                  "label": "Weight Based Dose:",
+                  "formula": "60 mg/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [
+                    {
+                      "value": "5",
+                      "unit": "mL",
+                      "formula": "5 mg/mL",
+                      "multipliers": [
+                        "dose"
+                      ]
+                    },
+                    {
+                      "value": "10",
+                      "unit": "mL",
+                      "formula": "10 mg/mL",
+                      "multipliers": [
+                        "dose"
+                      ],
+                      "decimals": -1
+                    },
+                    {
+                      "value": "15",
+                      "unit": "mL",
+                      "formula": "15 mg/mL",
+                      "multipliers": [
+                        "dose"
+                      ]
+                    },
+                    {
+                      "value": "100",
+                      "unit": "mL",
+                      "formula": "100 mg/mL",
+                      "multipliers": [
+                        "dose"
+                      ]
+                    }
+                  ],
+                  "rangeUnit": "mg",
+                  "segments": []
+                }
+              ]
+            },
+            {
+              "name": "Refactory Seizures / 4th Line - Midazolam",
+              "steps": [
+                {
+                  "algostep": "Midazolam Bolus ",
+                  "title": false
+                },
+                {
+                  "range1": "0.05",
+                  "range2": "0.1",
+                  "unit": "mg",
+                  "label": "Weight Based Dose:",
+                  "formula": "0.05-0.1 mg/kg",
+                  "max": "",
+                  "multipliers": [
+                    "kg"
+                  ],
+                  "volumes": [
+                    {
+                      "value": "1",
+                      "unit": "mL",
+                      "formula": "1 mg/mL",
+                      "multipliers": [
+                        "dose"
+                      ],
+                      "decimals": 2
+                    },
+                    {
+                      "value": "5",
+                      "unit": "mL",
+                      "formula": "5 mg/mL",
+                      "multipliers": [
+                        "dose"
+                      ],
+                      "decimals": 2
+                    }
+                  ],
+                  "decimals": 2,
+                  "rangeUnit": "mg",
+                  "segments": [
+                    "0.05",
+                    "0.10"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "premium": false
+    }
+  ]
+}
