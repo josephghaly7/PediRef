@@ -706,20 +706,32 @@ function fmtDR(lo,hi,u,kg,mxD,mxU,mnD,fixed){
   }
   return perkgStr+' '+u+' → '+fmtD(vlo)+'–'+fmtD(vhi)+' '+unitDisp;
 }
-function calcVol(lo,hi,kg,cStr,mxD){
+function calcVol(lo,hi,kg,cStr,mxD,doseU){
   if(!cStr||cStr.includes('D10')||cStr.includes('D25')||cStr.includes('NS')||cStr.includes('Neb')||cStr.includes('MDI')||cStr.includes('puffs'))return'';
-  let m=null;
+  // Parse concentration into a number, and remember its original unit
+  let m=null,concUnit='mg'; // concentration expressed in 'mg' or 'mcg' per mL
   const mgm=cStr.match(/([\d.]+)\s*mg\s*\/\s*ml/);
   const mcgm=cStr.match(/([\d.]+)\s*mcg\s*\/\s*ml/);
   const mEqm=cStr.match(/([\d.]+)\s*mEq\s*\/\s*ml/);
   const pctM=cStr.match(/\(([\d.]+)\s*mg\/ml\)/);
-  if(pctM)m=parseFloat(pctM[1]);
-  else if(mgm)m=parseFloat(mgm[1]);
-  else if(mcgm)m=parseFloat(mcgm[1])/1000;
-  else if(mEqm)m=parseFloat(mEqm[1]);
+  if(pctM){m=parseFloat(pctM[1]);concUnit='mg';}
+  else if(mgm){m=parseFloat(mgm[1]);concUnit='mg';}
+  else if(mcgm){m=parseFloat(mcgm[1]);concUnit='mcg';}
+  else if(mEqm){m=parseFloat(mEqm[1]);concUnit='mEq';}
   if(!m||m===0)return'';
-  let vlo=(lo*kg)/m,vhi=(hi*kg)/m;
-  if(mxD!==undefined){const mxV=mxD/m;vlo=Math.min(vlo,mxV);vhi=Math.min(vhi,mxV);}
+  // Convert concentration to mg/mL for the volume math
+  let mMgPerMl=m;
+  if(concUnit==='mcg')mMgPerMl=m/1000;
+  // Dose unit (lo/hi are in per-kg). If doseU is in mcg/kg, convert to mg/kg.
+  let loMg=lo,hiMg=hi;
+  if(doseU&&doseU.startsWith('mcg')){loMg=lo/1000;hiMg=hi/1000;}
+  let vlo=(loMg*kg)/mMgPerMl,vhi=(hiMg*kg)/mMgPerMl;
+  if(mxD!==undefined){
+    // mxD is in the same unit family as the dose (mcg for mcg-dose, mg for mg-dose)
+    // Convert mxD to mg if needed
+    const mxDMg=(doseU&&doseU.startsWith('mcg'))?mxD/1000:mxD;
+    const mxV=mxDMg/mMgPerMl;vlo=Math.min(vlo,mxV);vhi=Math.min(vhi,mxV);
+  }
   if(lo===hi||Math.abs(vlo-vhi)<.01){
     if(vlo<.05)return'';
     return vlo<1?vlo.toFixed(2)+' ml':Math.round(vlo*10)/10+' ml';
@@ -1166,7 +1178,7 @@ function renderAll(){
     h+=`<div class="sect collapsed" id="${sid}"><div class="sect-head" onclick="tg('${sid}')"><span class="emoji">${sec.emoji}</span> ${sec.title}<span class="arr">▾</span></div><div class="sect-body">`;
     for(const d of sec.drugs){
       const doseStr=fmtDR(d.lo,d.hi,d.u,kg,d.mx,d.mu,d.mn,d.fixed);
-      const volStr=d.fixed?'':calcVol(d.lo,d.hi,kg,d.c,d.mx);
+      const volStr=d.fixed?'':calcVol(d.lo,d.hi,kg,d.c,d.mx,d.u);
       // Check if THIS drug has an active CI
       const drugCIs=activeCIs.filter(x=>x.drug===d);
       const hasAbsCI=drugCIs.some(x=>x.sev==='absolute');
