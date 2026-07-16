@@ -668,6 +668,10 @@ body{
       <span class="pb-stat-label">Broselow</span>
       <span class="pb-stat-val" id="pbBr">White</span>
     </div>
+    <div class="pb-stat-item">
+      <span class="pb-stat-label">GCS</span>
+      <span class="pb-stat-val" id="gcsNum">15</span>
+    </div>
   </div>
   <button class="pb-btn alt" onclick="openFavorites()" title="View favorites">⭐</button>
   <button class="pb-btn" onclick="scrollToTop()" title="Change patient">✎ Change</button>
@@ -1117,7 +1121,7 @@ function openGCS(){
 function closeGCS(e){
   if(e&&e.target!==document.getElementById('gcsModal'))return;
   document.getElementById('gcsModal').classList.remove('open');
-  document.getElementById('gcsNum').textContent=gcsScore();
+  const _gn=document.getElementById('gcsNum');if(_gn)_gn.textContent=gcsScore();
 }
 function renderGCSModal(){
   const labels={E:['Spontaneous','To voice','To pain','None'],
@@ -1407,7 +1411,7 @@ function updateToolsBar(){
 
 // ==================== RENDER ====================
 function renderAll(){
-  document.getElementById('gcsNum').textContent=gcsScore();
+  const _gn=document.getElementById('gcsNum');if(_gn)_gn.textContent=gcsScore();
   updateToolsBar();
   const[al,ah]=estAgeFromWt(kg);const ay=(al+ah)/2;const br=findBroselow(kg);
   const vt=getVitals(ay);const eq=getEquip(kg,ay);
