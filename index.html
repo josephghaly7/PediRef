@@ -651,10 +651,12 @@ const wi=document.getElementById('wi'),ai=document.getElementById('ai'),au=docum
     const isLight=['Grey','Pink','Yellow','White'].includes(b.c);
     const kgRange=`${b.kgLo}–${b.kgHi} kg`;
     const ageRange=`${fmtAge(b.ageLo)}–${fmtAge(b.ageHi)}`;
+    const lenRange=`${b.lenLo}–${b.lenHi} cm`;
     h+=`<div class="chip br-chip" data-kg="${b.kg}" data-c="${b.c}" style="background:${brColors[b.c]};${isLight?'color:#111':''}">
       <div class="br-name">${b.c}</div>
       <div class="br-sub">${kgRange}</div>
       <div class="br-sub">${ageRange}</div>
+      <div class="br-sub">${lenRange}</div>
     </div>`;
   }
   bs.innerHTML=h;

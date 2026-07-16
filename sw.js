@@ -1,5 +1,5 @@
-// PediRef v15.2 — updated 2026-07-15 (Broselow chip ranges now use exact published boundaries, not derived mid±2kg)
-const CACHE = 'pediref-v15_2';
+// PediRef v15.3 — updated 2026-07-15 (Broselow chips now show height range too)
+const CACHE = 'pediref-v15_3';
 const ASSETS = [
   '/',
   '/index.html',
