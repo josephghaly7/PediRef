@@ -1,5 +1,5 @@
-// PediRef v15.4 — updated 2026-07-15 (Broselow chip heights corrected to published values: Grey 46-60.5, Green 134-146.5)
-const CACHE = 'pediref-v15_4';
+// PediRef v15.5 — updated 2026-07-15 (Broselow chip ages corrected to GMV EMSC PALS source: Grey newborn-3mo, Green 10-11yr)
+const CACHE = 'pediref-v15_5';
 const ASSETS = [
   '/',
   '/index.html',
