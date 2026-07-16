@@ -411,6 +411,9 @@ const SOURCES = {
   'SRC_KET_004': {name:'PEM Cincinnati — Ketamine Contraindications', url:'https://pemcincinnati.com/blog/ketamine-cnotraindications/', accessed:'2026-07-15'},
   'SRC_KET_005': {name:'pedemmorsels — Ketamine in Peds ED', url:'https://pedemmorsels.com/ketamine-clinical-uses-in-children/', accessed:'2026-07-15'},
   'SRC_UMASS_001': {name:'UMass Memorial Children\'s Medical Center — Pediatric Emergency Medicine Medication Dosing Card 2026-2027', url:'https://www.umassmemorialhealthcare.org/ (institutional card, PDF)', accessed:'2026-07-15'},
+  'SRC_AHA_PALS_2018': {name:'AHA PALS Scientific Statement — Management of Cardiac Arrest in Infants and Children with Cardiac Disease (Circulation, May 2018)', url:'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000552 (PMID: 29685887)', accessed:'2026-07-16'},
+  'SRC_OC_EMS_PR205': {name:'Orange County EMS — Pediatric Push-Dose Epinephrine Protocol PR-205 (Oct 2024)', url:'https://ochealthinfo.com/sites/healthcare/files/2024-10/PR-205%20Peds%20Push%20Dose%20Epi%209-2024.pdf', accessed:'2026-07-16'},
+  'SRC_COLE_2019': {name:'Cole JB et al. Human Errors and Adverse Hemodynamic Events Related to Push Dose Pressors in the ED. J Med Toxicol 2019;15:276-286 (PMID: 31270748)', url:'https://pmc.ncbi.nlm.nih.gov/articles/PMC6825064/', accessed:'2026-07-16'},
 };
 
 // Dose weights per wikEM/PALS: the weight used for actual medication dosing per color
@@ -540,8 +543,7 @@ const MEDS = [
   {n:'Morphine',sub:'Analgesia',lo:.05,hi:.1,u:'mg/kg',r:'IV/IO/IM',c:'2 mg/ml',mx:4,mu:'mg',note:'Titrate to pain. Onset 5-10 min IV.'},
 ]},
 {title:'Push-Dose Pressors',emoji:'📈',drugs:[
-  {n:'Epinephrine',sub:'Push-dose',lo:.5,hi:1,u:'mcg/kg',r:'IV',c:'(diluted) 10 mcg/ml',mx:10,mu:'mcg',note:'Prep: 1 ml of 1:10,000 + 9 ml NS = 10 mcg/ml. Push 1 ml at a time q2-5min. For post-arrest or peri-intubation hypotension.'},
-  {n:'Phenylephrine',sub:'Push-dose',lo:.5,hi:5,u:'mcg/kg',r:'IV',c:'(diluted) 100 mcg/ml',note:'Prep: 10 mg in 100 ml NS = 100 mcg/ml. 0.5-5 mcg/kg/dose, titrate q1-2 min. Pure α-agonist — watch reflex bradycardia.'},
+  {n:'Epinephrine',sub:'Push-dose',lo:1,hi:1,u:'mcg/kg',r:'IV/IO',c:'(diluted) 10 mcg/ml',mx:10,mu:'mcg',src:['SRC_AHA_PALS_2018','SRC_OC_EMS_PR205'],note:'LOW-EVIDENCE in peds. AHA 2018 PALS scientific statement: 1 mcg/kg (1/10 arrest dose), Class IIa, LoE C. Prep: 1 mL of cardiac epi 1:10,000 + 9 mL NS = 10 mcg/mL. Give 0.1 mL/kg of dilution IV/IO. Max 10 mcg/dose. Repeat q2-3 min. Titrate to SBP: <10y → 70+(age×2); ≥10y → 90. Bridge to infusion. Label the syringe. Cole 2019 (adults, J Med Toxicol): 39% adverse event rate, 19% human error; 10-fold overdose is the classic mistake.'},
 ]},
 {title:'Asthma / Bronchospasm',emoji:'🫁',drugs:[
   {n:'Albuterol',sub:'Nebulized',lo:2.5,hi:5,u:'mg',r:'Neb',c:'0.5% (5 mg/ml)',fixed:true,src:['SRC_UMASS_001'],note:'UMass 2026: <20 kg: 2.5 mg/dose; ≥20 kg: 5 mg/dose. Continuous for severe. Add ipratropium for mod-severe.'},
