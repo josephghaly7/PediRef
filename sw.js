@@ -1,5 +1,5 @@
-// PediRef v14 — updated 2026-07-14 (audit uncertain quick wins: etomidate sepsis softening, dextrose 5/2/1 rule)
-const CACHE = 'pediref-v14';
+// PediRef v15 — updated 2026-07-15 (Broselow chips now show kg range + age range)
+const CACHE = 'pediref-v15';
 const ASSETS = [
   '/',
   '/index.html',
