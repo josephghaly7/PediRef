@@ -1,5 +1,5 @@
-// PediRef v15.1 — updated 2026-07-15 (Broselow chip edges tightened to match wikEM + LA County EMS)
-const CACHE = 'pediref-v15_1';
+// PediRef v15.2 — updated 2026-07-15 (Broselow chip ranges now use exact published boundaries, not derived mid±2kg)
+const CACHE = 'pediref-v15_2';
 const ASSETS = [
   '/',
   '/index.html',
