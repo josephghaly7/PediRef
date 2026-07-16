@@ -1,0 +1,206 @@
+{
+  "shot_01.png": {
+    "source": "wikem.org (NOT STAT EM \u2014 included for Broselow color reference)",
+    "type": "Broselow color chart",
+    "content": "Pediatric weight/age by Broselow color: Green 35kg/10yr, Orange 25kg/8yr, Blue 20kg/6yr, White 15kg/4yr, Yellow 12kg/2yr, Purple 10kg/1yr, Red 8kg/6mo, Pink 6kg/4mo, Gray 5kg/2mo and 3.5kg/newborn, Preemie 2kg",
+    "useful": true
+  },
+  "shot_02.png": {
+    "source": "STAT EM",
+    "type": "Enter Age screen",
+    "content": "Two tabs: 'age' (selected) and 'birthday'. Wheel pickers for years and months. Currently set to 0 years 0 months = 'new born'",
+    "useful": true
+  },
+  "shot_03.webp": {
+    "source": "STAT EM",
+    "type": "Categories list (pediatric, top of list)",
+    "content": "Visible: Pain Management, Pressure Support, Procedural Sedation, Respiratory, Seizure/Status Epilepticus, Shock, Toxicology, Trauma, CODE SHEET, EMSC/EIIC. Bottom bar: 10.0 kg, 0y 11m, 76.0 cm, Favorites. Search bar at top.",
+    "useful": true
+  },
+  "shot_04.webp": {
+    "source": "STAT EM",
+    "type": "Categories list (pediatric, middle)",
+    "content": "Visible: Burns, Cardiac Resuscitation, Equipment, Fever, Fluid/Blood Resuscitation, Glasgow Coma Scale, Hypoglycemia, Pain Management, Pressure Support, Procedural Sedation. Bottom: 10.0 kg, 0y 11m, 76.0 cm, Favorites.",
+    "useful": true
+  },
+  "shot_05.webp": {
+    "source": "STAT EM",
+    "type": "Categories list (pediatric, top)",
+    "content": "Visible: Vital Signs, Airway Intervention/Intubation, Agitation, Anaphylaxis/Allergic Reaction, Antiemetics, Antimicrobials (IV/IM), Antimicrobials (Oral), Burns, Cardiac Resuscitation. Bottom: 10.0 kg, 0y 11m, 76.0 cm, Favorites.",
+    "useful": true
+  },
+  "shot_06.png": {
+    "source": "STAT EM",
+    "type": "Home screen (entry point)",
+    "content": "Six big buttons: PEDIATRIC WEIGHT (\u226443 kg / \u226494 lbs, scale icon), PEDIATRIC AGE (calendar icon), PEDIATRIC HEIGHT (ruler icon), PEDIATRIC LENGTH TAPE (Broselow color icon), ADULT (>43 kg / >94 lbs), NEONATAL RESUSCITATION (baby icon). Footer note: 'Weight provides the most accurate estimations of dosages and equipment sizes.'",
+    "useful": true
+  },
+  "shot_07.webp": {
+    "source": "STAT EM",
+    "type": "Categories list (pediatric, 20 kg patient)",
+    "content": "Same categories as before but now with 20.0 kg, 5y 0m, 114.5 cm patient. Visible bottom: Pain Management, Pressure Support, Procedural Sedation, Respiratory, Seizure/Status Epilepticus, Shock, Toxicology, Trauma, CODE SHEET, EMSC/EIIC",
+    "useful": true
+  },
+  "shot_08.webp": {
+    "source": "STAT EM",
+    "type": "Categories list (pediatric, 20 kg patient, top)",
+    "content": "Top of categories for 20 kg patient: Cardiac Resuscitation, Equipment, Fever, Fluid/Blood Resuscitation, Glasgow Coma Scale, Hypoglycemia, Pain Management, Pressure Support, Procedural Sedation",
+    "useful": true
+  },
+  "shot_09.webp": {
+    "source": "STAT EM",
+    "type": "Categories list (pediatric, top)",
+    "content": "Vital Signs, Airway Intervention/Intubation, Agitation, Anaphylaxis/Allergic Reaction, Antiemetics, Antimicrobials (IV/IM), Antimicrobials (Oral), Burns, Cardiac Resuscitation. 20 kg patient.",
+    "useful": true
+  },
+  "shot_10.png": {
+    "source": "STAT EM",
+    "type": "Calculate Weight screen",
+    "content": "'enter weight' prompt with kg unit. Validation: 'weight must be >= 0.5 kg'. Toggle: lb / kg (kg selected). Blue 'continue' button at bottom.",
+    "useful": true
+  },
+  "shot_11.png": {
+    "source": "STAT EM",
+    "type": "Home screen (entry point)",
+    "content": "Same home screen as shot_06 (60 kg adult patient likely loaded)",
+    "useful": true
+  },
+  "shot_12.png": {
+    "source": "STAT EM",
+    "type": "Choose Weight list (3-12 kg)",
+    "content": "Broselow-style colored list: 3kg (gray, 6.6 lbs), 4kg (gray, 8.8 lbs), 5kg (gray, 11 lbs), 6kg (light pink, 13 lbs), 7kg (pink, 15 lbs), 8kg (red, 17 lbs), 9kg (red, 20 lbs), 10kg (purple, 22 lbs), 11kg (purple, 24 lbs), 12kg (yellow, 26 lbs)",
+    "useful": true
+  },
+  "shot_13.webp": {
+    "source": "STAT EM",
+    "type": "Categories list (neonatal section, top)",
+    "content": "Neonatal Resuscitation, Gestational Age Estimates, Emergency Medications, Umbilical Catheter, Oxygen Saturation, APGAR score, Crashing Neonate DDX, Neonatal Seizures. Bottom: 3.5 kg, Neonate, Neonate, Favorites.",
+    "useful": true
+  },
+  "shot_14.webp": {
+    "source": "STAT EM",
+    "type": "Default weight prompt (neonatal)",
+    "content": "Modal: 'Default weight \u2014 A default weight of 3500 grams have been set for this section's calculations. For most accurate calculations, it is recommended this is modified by using the bottom bar weight icon once a weight is known.' [ok]",
+    "useful": true
+  },
+  "shot_15.png": {
+    "source": "STAT EM",
+    "type": "Categories list (adult section, top)",
+    "content": "Obstetrical Emergencies, Pain Management, Pressure Management, Procedural Sedation, Respiratory, Seizure/Status Epilepticus, Shock, Toxicology, Trauma, Vital Signs. Bottom: 60.0 kg, IBW 56.9 kg, Favorites.",
+    "useful": true
+  },
+  "shot_16.png": {
+    "source": "STAT EM",
+    "type": "Categories list (adult, middle)",
+    "content": "Burns, Cardiac Resuscitation, Equipment, Fever, Fluid/Blood Resuscitation, Glasgow Coma Scale, Hypoglycemia, Obstetrical Emergencies, Pain Management, Pressure Management. Bottom: 60.0 kg, IBW 56.9 kg, Favorites.",
+    "useful": true
+  },
+  "shot_17.webp": {
+    "source": "STAT EM",
+    "type": "Categories list (adult, top)",
+    "content": "Airway Intervention/Intubation, Agitation, Alcohol Withdrawal, Anaphylaxis/Allergic Reaction, Anticoagulation Reversal, Antiemetics, Antimicrobials (IV/IM), Burns, Cardiac Resuscitation. Bottom: 60.0 kg, IBW 56.9 kg, Favorites.",
+    "useful": true
+  },
+  "shot_18.png": {
+    "source": "STAT EM",
+    "type": "Calculate Weight screen with IBW prompt",
+    "content": "Weight set to 60 kg. Modal: 'Ideal Body Weight \u2014 Would you like to calculate the Ideal Body Weight?' [yes] [no]. Blue 'continue' button.",
+    "useful": true
+  },
+  "shot_19.png": {
+    "source": "STAT EM",
+    "type": "Ideal Body Weight calc screen",
+    "content": "Height: 160 cm (must be above 143.3 cm). Toggle: male (selected) / female. Result: 'Ideal Body Weight: 56.9 kg'. Green 'continue' button.",
+    "useful": true
+  },
+  "shot_20.png": {
+    "source": "STAT EM",
+    "type": "Calculate Weight screen (60 kg adult)",
+    "content": "Weight: 60 kg. Toggle: lb / kg. Blue 'continue' button.",
+    "useful": true
+  },
+  "shot_21.png": {
+    "source": "STAT EM",
+    "type": "Calculate Height screen",
+    "content": "Height: 60 (must be between 40 and 300.0 cm). Toggle: in / cm (cm selected). Green 'continue' button.",
+    "useful": true
+  },
+  "shot_22.png": {
+    "source": "STAT EM",
+    "type": "Choose Weight list (3-12 kg, duplicate of 12)",
+    "content": "Same as shot_12 \u2014 Broselow color list 3-12 kg",
+    "useful": true
+  },
+  "shot_23.webp": {
+    "source": "STAT EM",
+    "type": "Categories list (neonatal, top, duplicate)",
+    "content": "Same as shot_13",
+    "useful": true
+  },
+  "shot_24.webp": {
+    "source": "STAT EM",
+    "type": "Default weight prompt (duplicate)",
+    "content": "Same as shot_14",
+    "useful": true
+  },
+  "shot_25.png": {
+    "source": "STAT EM",
+    "type": "Categories list (adult, top, duplicate)",
+    "content": "Same as shot_15",
+    "useful": true
+  },
+  "shot_26.png": {
+    "source": "STAT EM",
+    "type": "Categories list (adult, middle, duplicate)",
+    "content": "Same as shot_16",
+    "useful": true
+  },
+  "shot_27.webp": {
+    "source": "STAT EM",
+    "type": "Categories list (adult, top, duplicate)",
+    "content": "Same as shot_17",
+    "useful": true
+  },
+  "shot_28.png": {
+    "source": "STAT EM",
+    "type": "Calculate Weight with IBW prompt (duplicate)",
+    "content": "Same as shot_18",
+    "useful": true
+  },
+  "shot_29.png": {
+    "source": "STAT EM",
+    "type": "Ideal Body Weight calc (duplicate)",
+    "content": "Same as shot_19",
+    "useful": true
+  },
+  "shot_30.png": {
+    "source": "STAT EM",
+    "type": "Calculate Weight (duplicate)",
+    "content": "Same as shot_20",
+    "useful": true
+  },
+  "shot_31.png": {
+    "source": "STAT EM",
+    "type": "Calculate Height (duplicate)",
+    "content": "Same as shot_21",
+    "useful": true
+  },
+  "shot_32.png": {
+    "source": "STAT EM",
+    "type": "Choose Weight list (27-36 kg, continued from 12)",
+    "content": "Continued: 27kg (orange, 59 lbs), 28kg (orange, 61 lbs), 29kg (orange, 64 lbs), 30kg (green, 66 lbs), 31kg (green, 68 lbs), 32kg (green, 70 lbs), 33kg (green, 73 lbs), 34kg (green, 75 lbs), 35kg (green, 77 lbs), 36kg (green, 79 lbs)",
+    "useful": true
+  },
+  "shot_33.png": {
+    "source": "STAT EM",
+    "type": "Choose Weight list (15-23 kg, continued)",
+    "content": "Continued: 15kg (white, 33 lbs), 16kg (white, 35 lbs), 17kg (white, 37 lbs), 18kg (white, 40 lbs), 19kg (blue, 42 lbs), 20kg (blue, 44 lbs), 21kg (blue, 46 lbs), 22kg (blue, 48 lbs), 23kg (blue, 50 lbs)",
+    "useful": true
+  },
+  "shot_34.png": {
+    "source": "STAT EM",
+    "type": "Choose Weight list (12-22 kg with color transition)",
+    "content": "Color band transition visible: 12kg (yellow, 26 lbs), 13kg (yellow, 28 lbs), 14kg (yellow, 30 lbs) at top, then white 15-18kg, then blue 19-22kg",
+    "useful": true
+  }
+}
