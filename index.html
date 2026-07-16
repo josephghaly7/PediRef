@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PediRef">
 <meta name="theme-color" content="#0f0f1a">
-<title>PediRef v6</title>
+<title>PediRef v7</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
@@ -488,7 +488,6 @@ body{
 </div>
 
 <div class="strip" id="brosStrip"></div>
-<div class="strip" id="ageStrip"></div>
 
 <!-- ========== PATIENT INPUT HUB ========== -->
 <div class="patient-hub">
@@ -1037,7 +1036,7 @@ let updating=false; // prevent loops
 
 const wi=document.getElementById('wi'),ai=document.getElementById('ai'),au=document.getElementById('au'),
   hi=document.getElementById('hi'),ae=document.getElementById('ageEst'),
-  bs=document.getElementById('brosStrip'),ag=document.getElementById('ageStrip'),
+  bs=document.getElementById('brosStrip'),
   rs=document.getElementById('results');
 
 // ==================== INIT UI ====================
@@ -1069,13 +1068,8 @@ const wi=document.getElementById('wi'),ai=document.getElementById('ai'),au=docum
   bs.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',function(){
     setWeight(parseFloat(this.dataset.kg));
   }));
-  // Age chips
-  h='';
-  for(const a of AGES)h+=`<div class="chip" data-kg="${a.kg}" style="background:#252540;color:#aaa;border:1px solid #2a2a3e">${a.label}<br><span style="font-size:.6rem">${a.kg}kg</span></div>`;
-  ag.innerHTML=h;
-  ag.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',function(){
-    setWeight(parseFloat(this.dataset.kg));
-  }));
+  // (Age row removed in v7 — redundant with Broselow colors; age/weight can still
+  //  be entered via the Patient Hub input cards above.)
 })();
 
 function setWeight(w){

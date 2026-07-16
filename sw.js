@@ -1,5 +1,5 @@
 // PediRef v15.7 — updated 2026-07-16 (ketamine CI engine: ageMinMonths, src registry, modal, banner)
-const CACHE = 'pediref-v15_7';
+const CACHE = 'pediref-v15_8';
 const ASSETS = [
   '/',
   '/index.html',
