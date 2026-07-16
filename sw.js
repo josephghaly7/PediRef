@@ -1,5 +1,5 @@
-// PediRef v15.3 — updated 2026-07-15 (Broselow chips now show height range too)
-const CACHE = 'pediref-v15_3';
+// PediRef v15.4 — updated 2026-07-15 (Broselow chip heights corrected to published values: Grey 46-60.5, Green 134-146.5)
+const CACHE = 'pediref-v15_4';
 const ASSETS = [
   '/',
   '/index.html',
