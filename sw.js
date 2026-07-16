@@ -1,5 +1,5 @@
-// PediRef v15.5 — updated 2026-07-15 (Broselow chip ages corrected to GMV EMSC PALS source: Grey newborn-3mo, Green 10-11yr)
-const CACHE = 'pediref-v15_5';
+// PediRef v15.6 — updated 2026-07-15 (Broselow chips now use wikEM dose weights: Preemie 2kg, Gray 3.5/5kg, Green 35kg, etc.)
+const CACHE = 'pediref-v15_6';
 const ASSETS = [
   '/',
   '/index.html',
