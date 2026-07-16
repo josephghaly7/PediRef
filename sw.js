@@ -1,5 +1,5 @@
-// PediRef v15.6 — updated 2026-07-15 (Broselow chips now use wikEM dose weights: Preemie 2kg, Gray 3.5/5kg, Green 35kg, etc.)
-const CACHE = 'pediref-v15_6';
+// PediRef v15.7 — updated 2026-07-16 (ketamine CI engine: ageMinMonths, src registry, modal, banner)
+const CACHE = 'pediref-v15_7';
 const ASSETS = [
   '/',
   '/index.html',

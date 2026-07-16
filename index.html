@@ -135,6 +135,11 @@ body{
 .drug-dose .perkg{font-size:.65rem;color:#888;font-weight:400}
 .drug-vol{font-size:.65rem;color:#888;padding-bottom:1px}
 .drug-note{font-size:.62rem;color:#555;line-height:1.35}
+.ci-badge{display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;border-radius:50%;font-size:.7rem;margin-right:5px;cursor:pointer;vertical-align:middle;font-weight:700}
+.ci-badge.ci-abs{background:#c62828;color:#fff}
+.ci-badge.ci-rel{background:#f57c00;color:#fff}
+.drug-ci-abs{background:rgba(198,40,40,.12);border-left:3px solid #c62828}
+.drug-ci-rel{background:rgba(245,124,21,.10);border-left:3px solid #f57c00}
 .subhead{padding:6px 14px;font-size:.62rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.06em;background:#141428}
 
 /* EQUIP / VITALS */
@@ -373,10 +378,19 @@ body{
   </div>
 </div>
 
+<div class="modal-overlay" id="ciModal" onclick="closeCI(event)">
+  <div class="modal-box" style="max-width:420px" onclick="event.stopPropagation()">
+    <h3 id="ciTitle">⚠️ Contraindications</h3>
+    <div id="ciBody" style="max-height:60vh;overflow-y:auto;margin-bottom:12px"></div>
+    <button class="modal-close" onclick="closeCI()">Close</button>
+  </div>
+</div>
+
 <!-- HIDDEN PRINT DIV -->
 <div id="sheetPrint" style="display:none"></div>
 
 <div id="results"></div>
+<div id="ciBanner" style="display:none;position:sticky;top:0;z-index:50;margin:0 -16px;box-shadow:0 2px 8px rgba(0,0,0,.4)"></div>
 
 <div class="disc">
   ⚠️ Reference only. Verify against institutional protocols. Not a substitute for clinical judgment.<br>
@@ -386,6 +400,17 @@ body{
 
 <script>
 // ==================== DATA ====================
+
+// ==================== SOURCES ====================
+// Each entry: {id, name, url, accessed} — referenced by drugs via src field.
+// All sources are free, authoritative clinical references (FDA, NIH, AAP, peer-reviewed).
+const SOURCES = {
+  'SRC_KET_001': {name:'FDA KETALAR label (2018)', url:'https://www.accessdata.fda.gov/drugsatfda_docs/label/2018/016812s040lbl.pdf', accessed:'2026-07-15'},
+  'SRC_KET_002': {name:'AAP Pediatric Care Online — Ketamine monograph', url:'https://publications.aap.org/pediatriccare/drug-monograph/18/5495/Ketamine', accessed:'2026-07-15'},
+  'SRC_KET_003': {name:'LITFL — Pediatric Procedural Sedation with Ketamine (Nickson)', url:'https://litfl.com/pediatric-procedural-sedation-with-ketamine/', accessed:'2026-07-15'},
+  'SRC_KET_004': {name:'PEM Cincinnati — Ketamine Contraindications', url:'https://pemcincinnati.com/blog/ketamine-cnotraindications/', accessed:'2026-07-15'},
+  'SRC_KET_005': {name:'pedemmorsels — Ketamine in Peds ED', url:'https://pedemmorsels.com/ketamine-clinical-uses-in-children/', accessed:'2026-07-15'},
+};
 
 // Dose weights per wikEM/PALS: the weight used for actual medication dosing per color
 // (lower bound of the kg range, except Gray which is split into two sub-zones)
@@ -430,7 +455,21 @@ const MEDS = [
 ]},
 {title:'RSI — Induction',emoji:'😴',drugs:[
   {n:'Etomidate',sub:'',lo:.3,hi:.3,u:'mg/kg',r:'IV/IO',c:'2 mg/ml',mx:20,mu:'mg',note:'Hemodynamically neutral. Single-dose adrenal suppression (4-8 h) — prefer ketamine in sepsis.'},
-  {n:'Ketamine',sub:'',lo:1,hi:2,u:'mg/kg',r:'IV/IO',c:'50 or 100 mg/ml',note:'1 mg/kg for hypotension; 2 mg/kg for full dissociation. Bronchodilator — preferred in asthma.'},
+  {n:'Ketamine',sub:'IV',lo:1,hi:2,u:'mg/kg',r:'IV/IO',c:'50 or 100 mg/ml',mx:100,mu:'mg',src:['SRC_KET_001','SRC_KET_002','SRC_KET_003'],
+   ageMinMonths:3, ageMinSeverity:'absolute', ageMinReason:'Airway complications (laryngospasm, apnea) in infants',
+   ci:[
+     {type:'age', sev:'absolute', rule:'age<3mo', text:'Airway complication risk in infants', src:'SRC_KET_004'},
+     {type:'age', sev:'relative', rule:'fda<16', text:'FDA label: safety/efficacy not established <16y (clinical use off-label in peds)', src:'SRC_KET_001'},
+     {type:'condition', sev:'absolute', rule:'mh_history', text:'Schizophrenia / psychosis — risk of exacerbation', src:'SRC_KET_004'},
+     {type:'condition', sev:'relative', rule:'active_uri', text:'Active URI / pneumonia — increased laryngospasm risk', src:'SRC_KET_003'},
+   ],
+   note:'1 mg/kg for analgesia/sedation; 2 mg/kg for full dissociation. Bronchodilator — preferred in asthma. Avoid co-adjunct atropine (thickens secretions).'},
+  {n:'Ketamine',sub:'IM (no IV)',lo:4,hi:5,u:'mg/kg',r:'IM',c:'50 or 100 mg/ml',mx:500,mu:'mg',src:['SRC_KET_001','SRC_KET_003'],
+   ageMinMonths:3, ageMinSeverity:'absolute',
+   note:'IM when no IV access. Onset 3-5 min. Same age CIs as IV.'},
+  {n:'Ketamine',sub:'IN',lo:3,hi:6,u:'mg/kg',r:'IN',c:'50 mg/ml (divide both nares)',src:['SRC_KET_003','SRC_KET_005'],
+   ageMinMonths:3, ageMinSeverity:'absolute',
+   note:'Intranasal route. Divide between nares. Use 50 mg/mL concentration (50 mg/mL = 100 mg/mL not for IN).'},
   {n:'Propofol',sub:'',lo:2,hi:3,u:'mg/kg',r:'IV/IO',c:'10 mg/ml',note:'Avoid if hypotensive (SBP < 70+2×age). Use lower end in shock.'},
   {n:'Midazolam',sub:'Rarely used alone',lo:.1,hi:.3,u:'mg/kg',r:'IV/IO',c:'5 mg/ml',mx:5,mu:'mg',note:'Onset 1-2 min. Lower dose with opioids.'},
 ]},
@@ -1010,6 +1049,48 @@ function renderAll(){
   bs.querySelectorAll('.chip').forEach(c=>c.classList.toggle('sel',c.dataset.c===br.c));
   const bchip=bs.querySelector(`[data-c="${br.c}"]`);if(bchip)bchip.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
 
+  // ====== CONTRAINDICATION ENGINE ======
+  // ageYr is in years (decimal); ageMinMonths comparison
+  const ageMonths=ageYr*12;
+  const activeCIs=[]; // [{drug, ci, sev}]
+  for(const sec of MEDS){
+    for(const d of sec.drugs){
+      if(d.ci){
+        for(const ci of d.ci){
+          let active=false;
+          if(ci.type==='age'&&ci.rule==='age<3mo'&&ageMonths<3)active=true;
+          else if(ci.type==='age'&&ci.rule==='fda<16'&&ageYr<16)active=true;
+          else if(ci.type==='age'&&d.ageMinMonths&&ageMonths<d.ageMinMonths)active=true;
+          if(active)activeCIs.push({drug:d, ci, sev:ci.sev});
+        }
+      }else if(d.ageMinMonths&&ageMonths<d.ageMinMonths){
+        // Drug has ageMinMonths but no explicit CI entry — synthesize one
+        activeCIs.push({drug:d, ci:{sev:d.ageMinSeverity||'relative',text:d.ageMinReason||`Use caution <${d.ageMinMonths}mo`}, sev:d.ageMinSeverity||'relative'});
+      }
+    }
+  }
+  // Sort: absolute first
+  activeCIs.sort((a,b)=>(a.sev==='absolute'?0:1)-(b.sev==='absolute'?0:1));
+  // Update top-of-section banner — show on top of drugs
+  const banner=document.getElementById('ciBanner');
+  if(banner){
+    if(activeCIs.length>0){
+      const absCount=activeCIs.filter(x=>x.sev==='absolute').length;
+      const relCount=activeCIs.length-absCount;
+      let txt=`⚠️ ${activeCIs.length} contraindication${activeCIs.length>1?'s':''} for current age (${(ageMonths<24?Math.round(ageMonths)+'mo':(ageMonths/12).toFixed(1)+'yr')})`;
+      if(absCount>0)txt=`🚫 ${absCount} ABSOLUTE`;
+      if(relCount>0)txt+=` · ${relCount} relative caution${relCount>1?'s':''}`;
+      banner.style.display='block';
+      banner.style.background=absCount>0?'#c62828':'#f57c00';
+      banner.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;color:#fff;font-size:.78rem;font-weight:600"><span>${txt}</span><button onclick="openCIList()" style="background:rgba(255,255,255,.2);border:0;color:#fff;padding:4px 10px;border-radius:6px;font-size:.7rem;cursor:pointer">View all</button></div>`;
+    }else{
+      banner.style.display='none';
+    }
+  }
+  // Store globally for modal access
+  window._activeCIs=activeCIs;
+  // ====== END CI ENGINE ======
+
   let h='';
 
   // Vitals
@@ -1027,8 +1108,16 @@ function renderAll(){
     for(const d of sec.drugs){
       const doseStr=fmtDR(d.lo,d.hi,d.u,kg,d.mx,d.mu,d.mn,d.fixed);
       const volStr=d.fixed?'':calcVol(d.lo,d.hi,kg,d.c,d.mx);
-      h+=`<div class="drug">`+
-        `<div class="drug-name">${d.n}${d.sub?' — <span style="font-weight:400;color:#aaa">'+d.sub+'</span>':''}<span class="routes">${d.r}</span></div>`+
+      // Check if THIS drug has an active CI
+      const drugCIs=activeCIs.filter(x=>x.drug===d);
+      const hasAbsCI=drugCIs.some(x=>x.sev==='absolute');
+      const hasRelCI=drugCIs.some(x=>x.sev==='relative');
+      const drugKey=d.n+(d.sub?'|'+d.sub:'');
+      let ciBadge='';
+      if(hasAbsCI)ciBadge=`<span class="ci-badge ci-abs" title="Absolute contraindication" onclick="openCIDrug('${drugKey.replace(/'/g,"\\'")}')">⛔</span>`;
+      else if(hasRelCI)ciBadge=`<span class="ci-badge ci-rel" title="Caution" onclick="openCIDrug('${drugKey.replace(/'/g,"\\'")}')">⚠</span>`;
+      h+=`<div class="drug${hasAbsCI?' drug-ci-abs':''}${hasRelCI?' drug-ci-rel':''}">`+
+        `<div class="drug-name">${ciBadge}${d.n}${d.sub?' — <span style="font-weight:400;color:#aaa">'+d.sub+'</span>':''}<span class="routes">${d.r}</span></div>`+
         `<div class="drug-dose">${doseStr}</div>`+
         (volStr?`<div class="drug-vol">${volStr} of ${d.c}</div>`:(d.c?`<div class="drug-vol">${d.c}</div>`:''))+
         (d.note?`<div class="drug-note">${d.note}</div>`:'')+
@@ -1081,6 +1170,53 @@ function tg(id){document.getElementById(id).classList.toggle('collapsed');}
 // Init
 wi.value=kg;ai.value=ageYr;au.value='yr';hi.value=heightCm;
 renderAll();
+
+// ====== CI MODAL ======
+function openCIDrug(drugKey){
+  const[dn,ds]=(drugKey||'').split('|');
+  const list=(window._activeCIs||[]).filter(x=>x.drug.n===dn&&(x.drug.sub||'')===(ds||''));
+  if(list.length===0)return;
+  const d=list[0].drug;
+  document.getElementById('ciTitle').textContent=`⚠️ ${d.n}${d.sub?' ('+d.sub+')':''}`;
+  let html=`<div style="font-size:.85rem;color:#aaa;margin-bottom:10px">Dose: <b style="color:#fff">${d.lo}${d.lo===d.hi?'':'–'+d.hi} ${d.u}</b>${d.c?' · '+d.c:''}</div>`;
+  html+=`<div style="font-size:.75rem;color:#888;margin-bottom:8px">Current age: <b style="color:#fff">${ageYr<1?Math.round(ageYr*12)+' mo':ageYr.toFixed(1)+' yr'}</b></div>`;
+  for(const x of list){
+    const sevColor=x.sev==='absolute'?'#ff5252':'#ffb74d';
+    const sevLabel=x.sev==='absolute'?'⛔ ABSOLUTE':'⚠ CAUTION';
+    html+=`<div style="background:#1a1a2e;border-left:3px solid ${sevColor};padding:10px 12px;margin-bottom:8px;border-radius:6px">`;
+    html+=`<div style="font-weight:700;color:${sevColor};font-size:.7rem;margin-bottom:4px">${sevLabel}</div>`;
+    html+=`<div style="color:#fff;font-size:.85rem">${x.ci.text}</div>`;
+    if(x.ci.src&&SOURCES[x.ci.src]){
+      const s=SOURCES[x.ci.src];
+      html+=`<div style="margin-top:6px;font-size:.65rem;color:#888"><a href="${s.url}" target="_blank" rel="noopener" style="color:#7c8cf8">${s.name}</a> · accessed ${s.accessed}</div>`;
+    }
+    html+=`</div>`;
+  }
+  document.getElementById('ciBody').innerHTML=html;
+  document.getElementById('ciModal').classList.add('open');
+}
+function openCIList(){
+  const list=window._activeCIs||[];
+  if(list.length===0)return;
+  const ageStr=ageYr<1?Math.round(ageYr*12)+' mo':ageYr.toFixed(1)+' yr';
+  document.getElementById('ciTitle').textContent=`⚠️ All CIs @ ${ageStr}`;
+  let html='';
+  for(const x of list){
+    const sevColor=x.sev==='absolute'?'#ff5252':'#ffb74d';
+    const sevLabel=x.sev==='absolute'?'⛔':'⚠';
+    html+=`<div style="background:#1a1a2e;border-left:3px solid ${sevColor};padding:8px 10px;margin-bottom:6px;border-radius:6px;cursor:pointer" onclick="document.getElementById('ciModal').classList.remove('open');openCIDrug('${(x.drug.n+(x.drug.sub?'|'+x.drug.sub:'')).replace(/'/g,"\\'")}')">`;
+    html+=`<div style="font-weight:700;color:#fff;font-size:.8rem">${sevLabel} ${x.drug.n}${x.drug.sub?' ('+x.drug.sub+')':''}</div>`;
+    html+=`<div style="color:#aaa;font-size:.75rem">${x.ci.text}</div>`;
+    html+=`</div>`;
+  }
+  document.getElementById('ciBody').innerHTML=html;
+  document.getElementById('ciModal').classList.add('open');
+}
+function closeCI(e){
+  if(e&&e.target!==document.getElementById('ciModal'))return;
+  document.getElementById('ciModal').classList.remove('open');
+}
+// ====== END CI MODAL ======
 
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
