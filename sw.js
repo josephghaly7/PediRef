@@ -1,5 +1,5 @@
-// PediRef v15.9 — updated 2026-07-16 (v8: home screen, 3-group switcher, JSON-driven, 43kg gate, push-dose pressors removed)
-const CACHE = 'pediref-v15_9';
+// PediRef v15.10 — updated 2026-07-16 (v9: full-fidelity direct JSON renderer for neonatal, pediatric, and adult data)
+const CACHE = 'pediref-v15_10';
 const ASSETS = [
   '/',
   '/index.html',

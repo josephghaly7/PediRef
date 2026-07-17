@@ -1,7 +1,7 @@
 {
-  "name": "PediRef — Pediatric Emergency Reference",
+  "name": "PediRef — JSON Clinical Reference",
   "short_name": "PediRef",
-  "description": "Free & offline pediatric emergency dosing, equipment sizing, and vital signs reference for healthcare professionals.",
+  "description": "Offline clinical reference rendered directly from the neonatal, pediatric, and adult JSON data sets.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

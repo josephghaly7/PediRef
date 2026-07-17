@@ -1,14 +1,15 @@
-# 🩺 PediRef — Free Pediatric Emergency Reference
+# 🩺 PediRef — JSON Clinical Reference
 
-A free, offline-first pediatric emergency dosing and equipment sizing app for healthcare professionals. Works on any device — installable as a native app (PWA).
+A free, offline-first clinical reference app for healthcare professionals. The neonatal, pediatric, and adult data sets are bundled and rendered directly from the supplied JSON files. Works on any device — installable as a native app (PWA).
 
 **Built by PGY-1s, for PGY-1s.** Because $8 is $8.
 
 ## Features
-- 💉 **Weight-based medication dosing** — RSI, resuscitation, sedation, antibiotics, and more
-- 🔧 **Equipment sizing** — ETT, chest tubes, Foley, NG tubes, LMA
-- 💓 **Vital signs** by age
-- 🎨 **Broselow color-coded** quick select
+- 👶 **Neonates / Peds / Adults** group switcher
+- 📦 **Full-fidelity JSON rendering** — categories, subcategories, notes, tables, algorithms, steps, all dosage records, concentrations, segments, and extra fields
+- 🔎 **Search across every JSON field**
+- ⚖️ **Optional weight calculation line** — shown separately from the exact source formula/value
+- 🧾 **Exact JSON disclosure** on every entry for auditability
 - 📴 **Works fully offline** — no cell service? No problem.
 - 📱 **Install on home screen** — works like a native app on iOS & Android
 
@@ -20,7 +21,7 @@ A free, offline-first pediatric emergency dosing and equipment sizing app for he
 ## Disclaimer
 ⚠️ For reference only. Verify all doses against your institutional protocols. Not a substitute for clinical judgment.
 
-## Data Sources
-- Broselow Pediatric Emergency Tape
-- PALS / APLS guidelines
-- FP Notebook (public clinical reference)
+## Data Source
+- The three user-supplied JSON files: `data_neonatal.json`, `data_pedi.json`, and `data_adult.json`.
+
+The app does not silently drop non-drug entries. Empty categories and empty subcategories are retained as well.
