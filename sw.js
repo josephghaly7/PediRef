@@ -1,5 +1,5 @@
-// PediRef v15.10 — updated 2026-07-16 (v9: full-fidelity direct JSON renderer for neonatal, pediatric, and adult data)
-const CACHE = 'pediref-v15_10';
+// PediRef v15.11 — updated 2026-07-16 (v9.1: weight-aware threshold resolver, IBW badge, fixed-dose label, prose weight bands)
+const CACHE = 'pediref-v15_11';
 const ASSETS = [
   '/',
   '/index.html',
