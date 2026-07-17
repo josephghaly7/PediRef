@@ -1,0 +1,8 @@
+# Local safety copies / editor artifacts
+index.html.v*.bak
+*.swp
+*.swo
+.DS_Store
+
+# Local static-server output
+*.log

@@ -1,27 +1,79 @@
-# 🩺 PediRef — JSON Clinical Reference
+# PediRef
 
-A free, offline-first clinical reference app for healthcare professionals. The neonatal, pediatric, and adult data sets are bundled and rendered directly from the supplied JSON files. Works on any device — installable as a native app (PWA).
+Offline-first clinical reference PWA built from three JSON data sets.
 
-**Built by PGY-1s, for PGY-1s.** Because $8 is $8.
+## Project layout
 
-## Features
-- 👶 **Neonates / Peds / Adults** group switcher
-- 📦 **Full-fidelity JSON rendering** — categories, subcategories, notes, tables, algorithms, steps, all dosage records, concentrations, segments, and extra fields
-- 🔎 **Search across every JSON field**
-- ⚖️ **Optional weight calculation line** — shown separately from the exact source formula/value
-- 🧾 **Exact JSON disclosure** on every entry for auditability
-- 📴 **Works fully offline** — no cell service? No problem.
-- 📱 **Install on home screen** — works like a native app on iOS & Android
+```text
+.
+├── index.html                 # Complete app: UI, renderer, and bundled JSON
+├── data/                      # Canonical source JSON files
+│   ├── data_neonatal.json
+│   ├── data_pedi.json
+│   └── data_adult.json
+├── sw.js                      # Service worker and cache version
+├── manifest.json              # PWA manifest
+├── icon-192.png
+├── icon-512.png
+├── scripts/                   # Maintainer checks and utilities
+└── README.md
+```
 
-## How to Install on Your Phone
-1. Open the site in Safari (iPhone) or Chrome (Android)
-2. Tap the Share button → "Add to Home Screen"
-3. Done — it's now an app icon on your home screen
+## Source of truth
 
-## Disclaimer
-⚠️ For reference only. Verify all doses against your institutional protocols. Not a substitute for clinical judgment.
+The three files in `data/` are the canonical source data:
 
-## Data Source
-- The three user-supplied JSON files: `data_neonatal.json`, `data_pedi.json`, and `data_adult.json`.
+- `data/data_neonatal.json`
+- `data/data_pedi.json`
+- `data/data_adult.json`
 
-The app does not silently drop non-drug entries. Empty categories and empty subcategories are retained as well.
+`index.html` bundles these same JSON objects for offline use and renders the source shape directly. The runtime renderer is intentionally not backed by a separate hand-coded medication array or flattened export.
+
+Current payload coverage:
+
+| Group | Categories | Items | Dosage records |
+|---|---:|---:|---:|
+| Neonates | 9 | 37 | 8 |
+| Peds | 24 | 430 | 379 |
+| Adults | 24 | 418 | 367 |
+
+The app retains empty categories/subcategories and non-dosage entries such as notes, tables, algorithms, and step lists. Each entry also has an expandable exact-JSON view for reviewability.
+
+## Run locally
+
+From the project root:
+
+```bash
+python3 -m http.server 4173
+```
+
+Open <http://127.0.0.1:4173/>.
+
+Do not open `index.html` with `file://`; service-worker/PWA behavior requires HTTP or HTTPS.
+
+## Maintainer checks
+
+Extract and syntax-check the inline JavaScript:
+
+```bash
+node -e "const fs=require('fs');const h=fs.readFileSync('index.html','utf8');const m=h.match(/<script>([\\s\\S]*?)<\\/script>/);if(!m)throw Error('script missing');fs.writeFileSync('/tmp/pediref-check.js',m[1]);"
+node --check /tmp/pediref-check.js
+```
+
+Before deployment, verify that the three bundled objects exactly match the canonical JSON files in `data/`, and test the Neonates, Peds, Adults, search, dose-entry, and exact-JSON disclosure paths in a browser.
+
+## Deployment
+
+GitHub Pages serves `main` at:
+
+<https://josephghaly7.github.io/PediRef/>
+
+After changing the app or service worker, bump the cache identifier in `sw.js`, run the checks above, commit, push, and verify the live URL rather than relying only on the GitHub push result.
+
+## Historical material
+
+Historical audits, comparisons, screenshots, and source-review notes were removed from the public project tree. They are not runtime inputs and can be kept separately outside the repository if needed for provenance.
+
+## Clinical disclaimer
+
+Reference display only. Verify doses and protocols against institutional standards before clinical use. The app does not replace clinical judgment.
