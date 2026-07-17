@@ -1,5 +1,5 @@
-// PediRef v15.7 — updated 2026-07-16 (ketamine CI engine: ageMinMonths, src registry, modal, banner)
-const CACHE = 'pediref-v15_8';
+// PediRef v15.9 — updated 2026-07-16 (v8: home screen, 3-group switcher, JSON-driven, 43kg gate, push-dose pressors removed)
+const CACHE = 'pediref-v15_9';
 const ASSETS = [
   '/',
   '/index.html',
