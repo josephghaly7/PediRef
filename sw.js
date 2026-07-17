@@ -1,5 +1,5 @@
-// PediRef v15.14 — updated 2026-07-16 (v9.3: BMI > 25 gate for IBW, sex-based default heights)
-const CACHE = 'pediref-v15_14';
+// PediRef v15.15 — updated 2026-07-16 (v9.4: preserve adult height when weight/useDefault changes)
+const CACHE = 'pediref-v15_15';
 const ASSETS = [
   '/',
   '/index.html',

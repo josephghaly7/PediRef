@@ -404,7 +404,11 @@ function init(){
   updateHome();
   $('search').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();render();});
   // Weight input: takes priority
-  $('weight').addEventListener('input',e=>{const n=num(e.target.value);if(n!==null&&n>0){weightKg=n;weightSrc='kg';ageYr=null;$('age').value='';heightCm=null;$('height').value='';render();}});
+  // Weight input: takes priority. On Peds, clears height (since weight becomes the source).
+  // On Adults, height is needed for IBW — preserve it.
+  $('weight').addEventListener('input',e=>{const n=num(e.target.value);if(n!==null&&n>0){weightKg=n;weightSrc='kg';ageYr=null;$('age').value='';
+    if(currentGroup==='pedi'){ heightCm=null; $('height').value=''; }
+    render();}});
   // Age input: yr/mo toggle, resolves to weight via Broselow (Peds only). Adult: ignored (dose by total weight).
   function applyAge(){
     const v=num($('age').value);
@@ -430,7 +434,12 @@ function init(){
   // Sex selector: adult only
   $('sex').addEventListener('change',e=>{sex=e.target.value; render();});
   // Default weight button — re-applies the entered weight and clears age/height override
-  $('useDefault').addEventListener('click',()=>{ageYr=null;heightCm=null;$('age').value='';$('height').value='';weightSrc='default';render();});
+  // Default weight button — re-applies the entered weight and clears age/height override.
+  // On Peds, height is derived (Broselow) so it's safe to clear. On Adults, height is the IBW
+  // input — clearing it would also clear IBW, so we preserve it.
+  $('useDefault').addEventListener('click',()=>{ageYr=null;$('age').value='';weightSrc='default';
+    if(currentGroup==='pedi'){ heightCm=null; $('height').value=''; }
+    render();});
 }
 init();
 </script></body></html>
