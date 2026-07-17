@@ -1,5 +1,5 @@
-// PediRef v15.15 — updated 2026-07-16 (v9.4: preserve adult height when weight/useDefault changes)
-const CACHE = 'pediref-v15_15';
+// PediRef v15.16 — updated 2026-07-16 (v9.5: adult intake modal with IBW Yes/No, defaults button inside modal)
+const CACHE = 'pediref-v15_16';
 const ASSETS = [
   '/',
   '/index.html',
