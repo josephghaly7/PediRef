@@ -450,7 +450,20 @@ function render(){
     desc = `${s.categories} categories · ${s.items} entries · ${s.doses} dosage records — gestational-age based`;
   }
   $('groupDesc').textContent=desc;
-  $('weight').value=weightKg;
+  // Unit-aware weight/height rendering on the main bar
+  if(currentUnits === 'imperial'){
+    $('weight').value = Math.round(kgToLb(weightKg) * 10) / 10;
+    if(heightCm != null && Number.isFinite(heightCm)){
+      const fi = cmToFtIn(heightCm);
+      $('heightFt').value = fi.ft;
+      $('heightIn').value = fi.inches;
+    }
+  } else {
+    $('weight').value = weightKg;
+    if(heightCm != null && Number.isFinite(heightCm)){
+      $('height').value = Math.round(heightCm * 10) / 10;
+    }
+  }
   let cov = `<b>${esc(g.label)}</b> · ${s.categories} categories · ${s.subs} subcategories · ${s.items} items · ${s.doses} dosage records · <b>weight ${fmt(weightKg)} kg`;
   if(currentGroup==='pedi'){
     const br = findBroselow(weightKg);
