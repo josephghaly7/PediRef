@@ -1,5 +1,5 @@
-// PediRef v15.12 — updated 2026-07-16 (v9.1: weight-aware threshold resolver, IBW badge, fixed-dose label, prose weight bands)
-const CACHE = 'pediref-v15_12';
+// PediRef v15.13 — updated 2026-07-16 (v9.2: default adult height 70 in / 178 cm)
+const CACHE = 'pediref-v15_13';
 const ASSETS = [
   '/',
   '/index.html',

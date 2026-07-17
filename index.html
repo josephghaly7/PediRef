@@ -363,7 +363,7 @@ function render(){
 }
 
 function toggleCategory(i){const el=$(`cat-${i}`);if(el)el.classList.toggle('collapsed');}
-function loadGroup(name){if(!GROUPS[name])return;currentGroup=name;query='';$('search').value='';$('home').style.display='none';$('app').style.display='block';if(name==='adult' && heightCm==null) heightCm=170; if(name==='pedi' && heightCm==null) heightCm=100; $('height').value=heightCm;$('age').value = ageYr!=null ? (ageYr<1 ? Math.round(ageYr*12) : Math.round(ageYr*10)/10) : ''; $('au').value = ageYr!=null && ageYr<1 ? 'mo':'yr'; $('sex').value=sex; render();window.scrollTo(0,0);}
+function loadGroup(name){if(!GROUPS[name])return;currentGroup=name;query='';$('search').value='';$('home').style.display='none';$('app').style.display='block';if(name==='adult' && heightCm==null) heightCm=178; if(name==='pedi' && heightCm==null) heightCm=100; $('height').value=heightCm;$('age').value = ageYr!=null ? (ageYr<1 ? Math.round(ageYr*12) : Math.round(ageYr*10)/10) : ''; $('au').value = ageYr!=null && ageYr<1 ? 'mo':'yr'; $('sex').value=sex; render();window.scrollTo(0,0);}
 function showHome(){$('app').style.display='none';$('home').style.display='flex';currentGroup=null;}
 
 function init(){
