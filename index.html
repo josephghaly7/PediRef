@@ -59,6 +59,27 @@ details.raw{margin-top:8px}details.raw summary{cursor:pointer;color:#7181a3;font
 /* Adult intake modal */
 .modal-backdrop{position:fixed;inset:0;background:rgba(7,12,24,.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:50}
 .modal-backdrop.open{display:flex}
+/* Peds Broselow color grid (intake modal). Each tile = one BROSLOW row; tap to pick. */
+.peds-color-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:6px 0 14px}
+@media(min-width:480px){.peds-color-grid{grid-template-columns:repeat(3,1fr)}}
+.peds-color-tile{border:0;border-radius:10px;padding:8px 10px;text-align:left;color:#07101e;font-family:inherit;cursor:pointer;transition:transform .08s,box-shadow .08s;display:flex;flex-direction:column;gap:2px;min-height:46px}
+.peds-color-tile:active{transform:scale(.97)}
+.peds-color-tile.picked{outline:3px solid var(--accent);outline-offset:2px;box-shadow:0 0 0 1px rgba(0,0,0,.4) inset}
+.peds-color-tile .tile-name{font-size:.78rem;font-weight:900;letter-spacing:.02em}
+.peds-color-tile .tile-kg{font-size:.95rem;font-weight:900;line-height:1}
+.peds-color-tile .tile-kg .unit{font-size:.55rem;font-weight:700;opacity:.7;margin-left:2px}
+.peds-color-name-Preemie{background:#e8f4f8;color:#1c3a4a}
+.peds-color-name-Gray{background:#b8b8b8;color:#1a1a1a}
+.peds-color-name-Pink{background:#f8c8d0;color:#5a1a24}
+.peds-color-name-Red{background:#ff7060;color:#fff}
+.peds-color-name-Purple{background:#ff3df0;color:#fff}
+.peds-color-name-Yellow{background:#fff05a;color:#3a2a00}
+.peds-color-name-White{background:#f4f0e8;color:#3a2a00}
+.peds-color-name-Blue{background:#5a8cff;color:#fff}
+.peds-color-name-Orange{background:#ff9a3c;color:#3a1a00}
+.peds-color-name-Green{background:#7ad96a;color:#0e2a08}
+.peds-divider{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.6rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:4px 0 8px}
+.peds-divider::before,.peds-divider::after{content:'';flex:1;height:1px;background:var(--line)}
 .modal{background:#0e1a30;border:1px solid #2a3958;border-radius:14px;padding:22px 24px 18px;width:min(440px,92vw);box-shadow:0 24px 60px rgba(0,0,0,.5);color:var(--text)}
 .modal h2{margin:0 0 4px;font-size:1.05rem;color:var(--accent)}
 .modal .modal-sub{font-size:.78rem;color:#9fb0d0;margin-bottom:16px;line-height:1.45}
@@ -136,6 +157,30 @@ details.raw{margin-top:8px}details.raw summary{cursor:pointer;color:#7181a3;font
     <div class="modal-actions">
       <button type="button" class="modal-cancel" id="modalCancel">Cancel</button>
       <button type="button" class="modal-go" id="modalGo">Continue</button>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop" id="pedsModal" role="dialog" aria-modal="true" aria-labelledby="pedsModalTitle">
+  <div class="modal">
+    <h2 id="pedsModalTitle">🧒 Peds intake</h2>
+    <p class="modal-sub">Pick a Broselow-Luten color to set the dose weight, or enter a weight directly.</p>
+    <div class="peds-color-grid" id="pedsColorGrid"></div>
+    <div class="peds-divider">or enter weight directly</div>
+    <div class="modal-row">
+      <label for="pedsModalWeight">Weight</label>
+      <input id="pedsModalWeight" type="number" min="0.1" max="150" step="0.1" placeholder="kg">
+      <span class="unit" id="pedsModalWeightUnit">kg</span>
+    </div>
+    <div class="modal-row">
+      <label>Units</label>
+      <div class="modal-units-toggle">
+        <button type="button" id="pedsModalUnitsMetric" class="active">Metric</button>
+        <button type="button" id="pedsModalUnitsImperial">Imperial</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="modal-cancel" id="pedsModalCancel">Cancel</button>
+      <button type="button" class="modal-go" id="pedsModalGo" disabled>Continue</button>
     </div>
   </div>
 </div>
@@ -486,11 +531,13 @@ function render(){
 function toggleCategory(i){const el=$(`cat-${i}`);if(el)el.classList.toggle('collapsed');}
 function loadGroup(name){
   if(!GROUPS[name])return;
-  if(name==='adult'){
-    showAdultModal();
-    return;
-  }
-  // Peds / Neonatal — direct load (no intake modal)
+  if(name==='adult'){ showAdultModal(); return; }
+  if(name==='pedi'){ showPediModal(); return; }
+  // Neonatal — direct load (no intake modal)
+  showAppFor(name);
+}
+// showAppFor centralizes the post-intake app entry (used by loadGroup after a modal commits)
+function showAppFor(name){
   currentGroup=name;query='';$('search').value='';$('home').style.display='none';$('app').style.display='block';
   if(name==='pedi' && heightCm==null) heightCm=100;
   $('height').value=heightCm;$('age').value = ageYr!=null ? (ageYr<1 ? Math.round(ageYr*12) : Math.round(ageYr*10)/10) : ''; $('au').value = ageYr!=null && ageYr<1 ? 'mo':'yr'; $('sex').value=sex; render();window.scrollTo(0,0);
@@ -538,6 +585,98 @@ function applyMainUnits(){
   }
   $('age').value = '';
   $('sex').value = sex;
+}
+
+// === Peds intake modal state (module scope so showPediModal can be reached from loadGroup's onclick) ===
+let pedsPickedBroselow = null;  // BROSLOW row, or null
+let pedsModalUnits = 'metric';  // sticky across modal opens
+function renderPediGrid(){
+  const grid = $('pedsColorGrid');
+  grid.innerHTML = BROSLOW.map((b, i) => {
+    const sub = b.sub ? ` · ${b.sub}` : '';
+    return `<button type="button" class="peds-color-tile peds-color-name-${esc(b.c)}" data-bi="${i}" aria-label="${esc(b.c)}${sub}, ${b.doseKg} kilograms">
+      <span class="tile-name">${esc(b.c)}${sub ? `<span style="font-size:.6rem;font-weight:700;opacity:.7">${esc(sub)}</span>` : ''}</span>
+      <span class="tile-kg">${fmt(b.doseKg)}<span class="unit">kg</span></span>
+    </button>`;
+  }).join('');
+  grid.querySelectorAll('.peds-color-tile').forEach(el => {
+    el.addEventListener('click', () => {
+      applyPediColor(BROSLOW[parseInt(el.dataset.bi, 10)]);
+    });
+  });
+}
+function applyPediColor(b){
+  pedsPickedBroselow = b;
+  $('pedsColorGrid').querySelectorAll('.peds-color-tile').forEach(el => {
+    el.classList.toggle('picked', BROSLOW[parseInt(el.dataset.bi, 10)] === b);
+  });
+  if(pedsModalUnits === 'imperial'){
+    $('pedsModalWeight').value = Math.round(kgToLb(b.doseKg) * 10) / 10;
+    $('pedsModalWeightUnit').textContent = 'lb';
+  } else {
+    $('pedsModalWeight').value = b.doseKg;
+    $('pedsModalWeightUnit').textContent = 'kg';
+  }
+  updatePediGo();
+}
+function applyPediUnits(){
+  const imperial = pedsModalUnits === 'imperial';
+  $('pedsModalUnitsMetric').classList.toggle('active', !imperial);
+  $('pedsModalUnitsImperial').classList.toggle('active', imperial);
+  if(pedsPickedBroselow){
+    if(imperial){
+      $('pedsModalWeight').value = Math.round(kgToLb(pedsPickedBroselow.doseKg) * 10) / 10;
+      $('pedsModalWeightUnit').textContent = 'lb';
+    } else {
+      $('pedsModalWeight').value = pedsPickedBroselow.doseKg;
+      $('pedsModalWeightUnit').textContent = 'kg';
+    }
+  } else {
+    $('pedsModalWeightUnit').textContent = imperial ? 'lb' : 'kg';
+    const v = num($('pedsModalWeight').value);
+    if(v != null && v > 0 && imperial) $('pedsModalWeight').value = Math.round(kgToLb(v) * 10) / 10;
+  }
+}
+function updatePediGo(){
+  const picked = pedsPickedBroselow != null;
+  const w = num($('pedsModalWeight').value);
+  const hasW = w != null && w > 0;
+  $('pedsModalGo').disabled = !(picked || hasW);
+}
+function showPediModal(){
+  if(weightKg == null || !Number.isFinite(weightKg) || weightKg <= 0) weightKg = 15;
+  pedsPickedBroselow = null;
+  pedsModalUnits = currentUnits === 'imperial' ? 'imperial' : 'metric';
+  $('pedsModalWeight').value = '';
+  applyPediUnits();
+  renderPediGrid();
+  updatePediGo();
+  $('pedsModal').classList.add('open');
+}
+function hidePediModal(){ $('pedsModal').classList.remove('open'); }
+function commitPediModal(){
+  let chosenKg = null;
+  let chosenAgeYr = null;
+  if(pedsPickedBroselow){
+    chosenKg = pedsPickedBroselow.doseKg;
+    const b = pedsPickedBroselow;
+    if(b.ageLo !== b.ageHi){
+      chosenAgeYr = (b.ageLo + b.ageHi) / 2;
+    } else if(b.sub === '2mo'){
+      chosenAgeYr = 2/12;
+    }
+    // For preemie/newborn rows where ageLo===ageHi===0, leave ageYr as null
+    // so the in-app age input starts blank (matches your data: age is not the dose key).
+  } else {
+    const w = num($('pedsModalWeight').value);
+    if(w == null || w <= 0) return;
+    chosenKg = pedsModalUnits === 'imperial' ? lbToKg(w) : w;
+  }
+  weightKg = chosenKg;
+  weightSrc = pedsPickedBroselow ? 'broselow' : 'kg';
+  ageYr = chosenAgeYr;
+  hidePediModal();
+  showAppFor('pedi');
 }
 
 // === Adult intake modal ===
@@ -825,6 +964,14 @@ function init(){
   $('adultModal').addEventListener('click', e=>{ if(e.target === $('adultModal')) hideAdultModal(); });
   // Enter inside any modal field submits
   ['modalHeight','modalHeightFt','modalHeightIn','modalWeight'].forEach(id => $(id).addEventListener('keydown', e=>{ if(e.key === 'Enter') commitAdultModal(); }));
+
+  $('pedsModalWeight').addEventListener('input', updatePediGo);
+  $('pedsModalUnitsMetric').addEventListener('click', ()=>{ pedsModalUnits='metric'; applyPediUnits(); });
+  $('pedsModalUnitsImperial').addEventListener('click', ()=>{ pedsModalUnits='imperial'; applyPediUnits(); });
+  $('pedsModalCancel').addEventListener('click', ()=>{ hidePediModal(); });
+  $('pedsModalGo').addEventListener('click', ()=>{ commitPediModal(); });
+  $('pedsModal').addEventListener('click', e=>{ if(e.target === $('pedsModal')) hidePediModal(); });
+  $('pedsModalWeight').addEventListener('keydown', e=>{ if(e.key === 'Enter' && !$('pedsModalGo').disabled) commitPediModal(); });
 }
 init();
 </script></body></html>
