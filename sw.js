@@ -1,5 +1,5 @@
-// PediRef v15.13 — updated 2026-07-16 (v9.2: default adult height 70 in / 178 cm)
-const CACHE = 'pediref-v15_13';
+// PediRef v15.14 — updated 2026-07-16 (v9.3: BMI > 25 gate for IBW, sex-based default heights)
+const CACHE = 'pediref-v15_14';
 const ASSETS = [
   '/',
   '/index.html',
