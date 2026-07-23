@@ -1,5 +1,5 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef · JSON Reference</title><style>
-:root{color-scheme:dark;--bg:#0b1020;--panel:#131b31;--panel2:#18233d;--line:#2a395d;--text:#edf2ff;--muted:#9aa9c7;--accent:#8ea7ff;--green:#57d68d;--yellow:#f6cf65;--red:#ff7474}
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef v10 · JSON Reference</title><style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#131b31;--panel2:#18233d;--line:#2a395d;--text:#edf2ff;--muted:#9aa9c7;--accent:#8ea7ff;--green:#57d68d;--yellow:#f6cf65;--red:#ff7474;--cat1:#1da1f2;--cat2:#ff8a3d;--cat3:#5cba47;--cat4:#e23aa6}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
 body{padding-bottom:28px}
@@ -107,15 +107,103 @@ details.raw{margin-top:8px}details.raw summary{cursor:pointer;color:#7181a3;font
 .modal .modal-units-toggle button.active{background:var(--accent);color:#06101e;border-color:var(--accent)}
 .modal .modal-row .unit.modal-cm-label{flex:0 0 24px}
 .modal .modal-row .modal-cm-hidden{display:none}
-</style></head><body><section id="home"><h1 class="brand">PediRef</h1><p class="tagline">The uploaded JSON is the source of truth. Every category, item, dose, algorithm, table, note, and raw entry is retained.</p><div class="group-grid"><button class="group-card" data-group="neonatal" onclick="loadGroup('neonatal')"><span class="group-icon">👶</span><span><span class="group-name">NEONATES</span><br><span class="group-desc">Neonatal resuscitation, gestational-age estimates, emergency meds, oxygen targets, UVC, and seizures.</span></span><span class="group-count" id="count-neonatal"></span></button><button class="group-card" data-group="pedi" onclick="loadGroup('pedi')"><span class="group-icon">🧒</span><span><span class="group-name">PEDS</span><br><span class="group-desc">All pediatric categories and entries from data_pedi.json, including doses and non-drug reference content.</span></span><span class="group-count" id="count-pedi"></span></button><button class="group-card" data-group="adult" onclick="loadGroup('adult')"><span class="group-icon">🧑</span><span><span class="group-name">ADULTS</span><br><span class="group-desc">All adult categories and entries from data_adult.json, including doses, algorithms, and tables.</span></span><span class="group-count" id="count-adult"></span></button></div><p class="source-note">No hand-coded clinical formulary is used by this view. The three uploaded JSON objects are bundled offline in this file and rendered without dropping non-dosage entries. Peds: age/height resolve to weight via Broselow-Luten. Adults: weight is required; IBW is computed from height+sex (Devine).</p></section><section id="app"><header class="topbar"><button class="back" onclick="showHome()">← Groups</button><div class="top-title"><h1 id="groupTitle">PediRef</h1><p id="groupDesc"></p></div><div class="switcher"><button data-group="neonatal" onclick="loadGroup('neonatal')">N</button><button data-group="pedi" onclick="loadGroup('pedi')">P</button><button data-group="adult" onclick="loadGroup('adult')">A</button></div></header><div class="controls">
-  <div class="weight-box"><label for="weight">Wt</label><input id="weight" type="number" min="0.1" max="300" step="0.1" value="15"><span id="weightUnit">kg</span></div>
-  <div class="age-box"><label for="age">Age</label><input id="age" type="number" min="0" max="120" step="0.1" placeholder="yr/mo"><select id="au"><option value="yr" selected>yr</option><option value="mo">mo</option></select></div>
-  <div class="height-box" id="heightBoxMetric"><label for="height">Ht</label><input id="height" type="number" min="30" max="230" step="0.5" placeholder="cm"><span>cm</span></div>
-  <div class="height-box modal-hidden" id="heightBoxImperial"><label for="heightFt">Ht</label><input id="heightFt" type="number" min="1" max="8" step="1" placeholder="ft"><span>ft</span><input id="heightIn" type="number" min="0" max="11.9" step="0.1" placeholder="in"><span>in</span></div>
-  <div class="units-toggle"><button type="button" id="unitsMetric" class="active">Metric</button><button type="button" id="unitsImperial">Imperial</button></div>
-  <div class="sex-box"><label for="sex">Sex</label><select id="sex"><option value="male" selected>male</option><option value="female">female</option></select></div>
-  <input class="search" id="search" type="search" placeholder="Search every JSON field…" autocomplete="off">
-</div><div class="coverage" id="coverage"></div><main id="results"></main><div class="disclaimer">Reference display only. Verify doses and protocols against your institutional standards before clinical use. Peds age/height resolve to weight via Broselow-Luten; adults use entered weight (TBW) and switch to Devine IBW only for entries flagged in the JSON as IBW-linked AND when BMI > 25. Calculated lines are arithmetic applied to an explicit JSON entry and never replace the exact formula shown above.</div></section><div class="modal-backdrop" id="adultModal" role="dialog" aria-modal="true" aria-labelledby="adultModalTitle">
+
+/* ============================================================
+ * Per-group "Categories" view (v10) - iOS-look light theme
+ * Applied to #app only; #home stays dark.
+ * ============================================================ */
+#app{color-scheme:light;background:#fff;color:#111}
+#app .topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #e5e7eb;padding:10px 14px;display:flex;align-items:center;gap:10px}
+#app .back{border:0;background:transparent;color:#111;font-size:1.4rem;padding:4px 6px;line-height:1;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+#app .back::before{content:"\2190";font-weight:600;font-size:1.2rem}
+#app .top-title{min-width:0;flex:1;text-align:center}
+#app .top-title h1{margin:0;font-size:1.05rem;font-weight:700;color:#111}
+#app .top-title p{margin:2px 0 0;font-size:.62rem;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#app .ref-link{border:0;background:transparent;color:#1d6ff0;font-size:.85rem;font-weight:600;cursor:pointer;padding:4px 6px;text-decoration:underline;font-style:italic}
+#app .controls{padding:12px 14px;background:#fff;border-bottom:1px solid #e5e7eb;display:block}
+#app .controls .search-wrap{display:block;width:100%}
+#app .controls .search-wrap input.search{width:100%;display:block}
+#app .search{flex:1;min-width:0;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:12px;color:#111;padding:10px 12px 10px 36px;outline:0;font-size:.85rem;position:relative}
+#app .search:focus{border-color:#1d6ff0;background:#fff;box-shadow:0 0 0 3px rgba(29,111,240,.12)}
+#app .search-wrap{position:relative;flex:1;min-width:0}
+#app .search-wrap .mag{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#9aa3b2;pointer-events:none;font-size:.95rem;line-height:1}
+#app .coverage{padding:6px 16px 4px;font-size:.7rem;color:#6b7280;background:#fff;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;border-bottom:1px solid #e5e7eb}
+#app .coverage b{color:#111;font-weight:700}
+#app .coverage .src-from{color:#0a7c2f;font-weight:700}
+#app #results{max-width:760px;margin:0 auto;padding:0 0 130px}
+#app .cat-row{display:flex;align-items:center;gap:14px;padding:14px 16px;background:#fff;border-bottom:1px solid #eef0f3;cursor:pointer;width:100%;border-left:0;border-right:0;border-top:0;text-align:left;transition:background .12s}
+#app .cat-row:active{background:#f7f8fa}
+#app .cat-row .cat-square{flex:0 0 38px;width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem;letter-spacing:.02em;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+#app .cat-row .cat-square.c1{background:var(--cat1)}
+#app .cat-row .cat-square.c2{background:var(--cat2)}
+#app .cat-row .cat-square.c3{background:var(--cat3)}
+#app .cat-row .cat-square.c4{background:var(--cat4)}
+#app .cat-row .cat-name{flex:1;font-size:.95rem;font-weight:600;color:#111;letter-spacing:-.005em;line-height:1.25}
+#app .cat-row .cat-meta{font-size:.7rem;color:#8a93a3;font-weight:500;margin-top:2px;display:block}
+#app .cat-row .cat-chevron{color:#c0c5cf;font-size:.9rem;font-weight:700;flex:0 0 auto;margin-left:6px;transition:transform .15s}
+#app .category.collapsed .cat-row .cat-chevron{transform:rotate(-90deg)}
+#app .category.collapsed .category-body{display:none}
+#app .category-body{background:#fff;padding:0 16px 14px}
+#app .subcategory{margin:0 0 8px;border-radius:10px;overflow:hidden;border:1px solid #eef0f3;background:#fafbfc}
+#app .subcategory-title{padding:9px 12px;background:#f3f4f6;color:#0b1020;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #eef0f3}
+#app .empty{padding:11px;color:#8a93a3;font-size:.7rem;font-style:italic}
+#app .item{padding:11px 12px;border-top:1px solid #eef0f3}
+#app .item:first-of-type{border-top:0}
+#app .item-name{font-size:.82rem;font-weight:700;color:#111;display:flex;align-items:flex-start;gap:7px}
+#app .item-name .brand{font-size:.62rem;color:#6b7280;font-weight:500;margin-left:auto;text-align:right}
+#app .item-note,#app .info-line,#app .formula,#app .value-block,#app .flag{font-size:.7rem;line-height:1.5;color:#374151;margin-top:5px}
+#app .info-line::before{content:"\2022 ";color:#1d6ff0}
+#app .formula{color:#7a4d00;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;background:#fff7e6;border-radius:6px;padding:6px 8px}
+#app .flag{color:#7a4d00;font-weight:700}
+#app .flag.ibw{color:#0a7c2f;font-weight:700}
+#app .steps{margin:7px 0 0;padding:0;list-style:none}
+#app .step{font-size:.72rem;line-height:1.5;color:#1f2937;padding:3px 0;white-space:pre-wrap}
+#app .step.title{color:#1d6ff0;font-weight:800;padding-top:7px}
+#app .dose{margin-top:8px;border-left:3px solid #0a7c2f;background:#f0fdf4;border-radius:0 8px 8px 0;padding:8px 10px}
+#app .dose-label{font-size:.65rem;color:#1d6ff0;font-weight:800;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+#app .dose-main{font-size:.82rem;color:#111;font-weight:700;line-height:1.4}
+#app .dose-detail{font-size:.65rem;color:#4b5563;line-height:1.45;margin-top:3px}
+#app .dose-calc{font-size:.7rem;color:#0a7c2f;font-weight:700;margin-top:5px}
+#app .volumes{margin-top:5px}
+#app .volume{font-size:.65rem;color:#4b5563;line-height:1.4}
+#app .volume::before{content:"\21b3 ";color:#0a7c2f}
+#app details.raw{margin-top:8px}
+#app details.raw summary{cursor:pointer;color:#6b7280;font-size:.62rem}
+#app details.raw pre{margin:6px 0 0;max-height:280px;overflow:auto;white-space:pre-wrap;word-break:break-word;color:#374151;background:#f3f4f6;border-radius:7px;padding:8px;font:11px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace}
+#app .threshold{margin-top:8px;border-left:3px solid #1d6ff0;background:#eff6ff;border-radius:0 8px 8px 0;padding:8px 10px}
+#app .threshold-head{font-size:.65rem;color:#1d6ff0;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:flex;justify-content:space-between;gap:6px}
+#app .threshold-head .pick{color:#0a7c2f;font-weight:800;text-transform:none;letter-spacing:0;font-size:.72rem}
+#app .threshold-table{width:100%;border-collapse:collapse;font-size:.68rem}
+#app .threshold-table th,#app .threshold-table td{padding:4px 6px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top;color:#1f2937}
+#app .threshold-table th{color:#6b7280;font-weight:700;text-transform:uppercase;font-size:.58rem;letter-spacing:.04em}
+#app .threshold-table tr.pick{background:#ecfdf5}
+#app .threshold-table tr.pick td{color:#111;font-weight:700}
+#app .threshold-table tr.pick td:first-child::before{content:"\25b6 ";color:#0a7c2f;font-size:.7rem}
+#app .threshold-table td.kg{color:#4b5563;white-space:nowrap;font-variant-numeric:tabular-nums}
+#app .threshold-note{font-size:.6rem;color:#6b7280;margin-top:6px}
+#app .no-results{padding:32px 16px;text-align:center;color:#6b7280}
+#app .actionbar{position:fixed;left:14px;right:14px;bottom:14px;background:#fff;border:1px solid #e5e7eb;border-radius:18px;box-shadow:0 6px 22px rgba(15,23,42,.10),0 1px 0 rgba(0,0,0,.02);padding:10px 6px 8px;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;z-index:30}
+#app .actionbar .ab-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border-radius:12px;background:transparent;border:0;color:#111;font:inherit;cursor:pointer;text-align:center;line-height:1.1}
+#app .actionbar .ab-item:active{background:#f3f4f6}
+#app .actionbar .ab-item .ab-ico{font-size:1.15rem;line-height:1}
+#app .actionbar .ab-item .ab-val{font-size:.7rem;font-weight:600;color:#111;margin-top:1px}
+#app .actionbar .ab-item .ab-label{font-size:.58rem;color:#6b7280;font-weight:600;letter-spacing:.02em;margin-top:1px}
+#app .actionbar .ab-item.fav .ab-ico{font-size:1.2rem}
+#app .ab-popover{position:fixed;left:14px;right:14px;bottom:88px;background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 12px 30px rgba(15,23,42,.14);padding:14px;z-index:35;display:none}
+#app .ab-popover.open{display:block}
+#app .ab-popover h3{margin:0 0 6px;font-size:.85rem;color:#111}
+#app .ab-popover .ab-fields{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+#app .ab-popover label{font-size:.7rem;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;flex:0 0 auto;align-self:center}
+#app .ab-popover input,#app .ab-popover select{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;color:#111;padding:7px 9px;font-size:.82rem;font:inherit;outline:0}
+#app .ab-popover input:focus,#app .ab-popover select:focus{border-color:#1d6ff0;background:#fff}
+#app .ab-popover .ab-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#app .ab-popover .ab-actions{display:flex;gap:8px;margin-top:10px;justify-content:flex-end}
+#app .ab-popover button.ab-ok{background:#1d6ff0;color:#fff;border:0;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer}
+#app .ab-popover button.ab-cancel{background:#f3f4f6;color:#111;border:0;border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer}
+#app .disclaimer{max-width:760px;margin:14px auto 130px;padding:10px 16px;color:#6b7280;font-size:.62rem;line-height:1.5;text-align:center}
+@media(min-width:700px){#app #results{padding:0 24px 130px}}
+</style></head><body><section id="home"><h1 class="brand">PediRef</h1><p class="tagline">The uploaded JSON is the source of truth. Every category, item, dose, algorithm, table, note, and raw entry is retained.</p><div class="group-grid"><button class="group-card" data-group="neonatal" onclick="loadGroup('neonatal')"><span class="group-icon">👶</span><span><span class="group-name">NEONATES</span><br><span class="group-desc">Neonatal resuscitation, gestational-age estimates, emergency meds, oxygen targets, UVC, and seizures.</span></span><span class="group-count" id="count-neonatal"></span></button><button class="group-card" data-group="pedi" onclick="loadGroup('pedi')"><span class="group-icon">🧒</span><span><span class="group-name">PEDS</span><br><span class="group-desc">All pediatric categories and entries from data_pedi.json, including doses and non-drug reference content.</span></span><span class="group-count" id="count-pedi"></span></button><button class="group-card" data-group="adult" onclick="loadGroup('adult')"><span class="group-icon">🧑</span><span><span class="group-name">ADULTS</span><br><span class="group-desc">All adult categories and entries from data_adult.json, including doses, algorithms, and tables.</span></span><span class="group-count" id="count-adult"></span></button></div><p class="source-note">No hand-coded clinical formulary is used by this view. The three uploaded JSON objects are bundled offline in this file and rendered without dropping non-dosage entries. Peds: age/height resolve to weight via Broselow-Luten. Adults: weight is required; IBW is computed from height+sex (Devine).</p></section><section id="app"><header class="topbar"><button class="back" onclick="showHome()" aria-label="Back to groups"></button><div class="top-title"><h1 id="groupTitle">Categories</h1><p id="groupDesc"></p></div><button type="button" class="ref-link" onclick="showReferences()">References</button></header><div class="controls"><div class="search-wrap"><span class="mag" aria-hidden="true">🔍</span><input class="search" id="search" type="search" placeholder="categories, medications, equipment, etc" autocomplete="off"></div></div><div id="hiddenControls" style="display:none!important;visibility:hidden" aria-hidden="true"><input id="weight" type="number" min="0.1" max="300" step="0.1" value="15"><span id="weightUnit">kg</span><input id="age" type="number" min="0" max="120" step="0.1" placeholder="yr/mo"><select id="au"><option value="yr" selected>yr</option><option value="mo">mo</option></select><input id="height" type="number" min="30" max="230" step="0.5" placeholder="cm"><span id="heightUnitLabel">cm</span><input id="heightFt" type="number" min="1" max="8" step="1" placeholder="ft"><input id="heightIn" type="number" min="0" max="11.9" step="0.1" placeholder="in"><div id="heightBoxMetric"></div><div id="heightBoxImperial" class="modal-hidden"></div><button type="button" id="unitsMetric"></button><button type="button" id="unitsImperial"></button><select id="sex"><option value="male" selected>male</option><option value="female">female</option></select></div>
+</div><div class="coverage" id="coverage"></div><main id="results"></main><div class="actionbar" role="toolbar" aria-label="Patient quick view"><button type="button" class="ab-item" id="abWt" onclick="openActionPopover('wt')"><span class="ab-ico" aria-hidden="true">⚖️</span><span class="ab-val" id="abWtVal">15.0 kg</span><span class="ab-label">Weight</span></button><button type="button" class="ab-item" id="abAge" onclick="openActionPopover('age')"><span class="ab-ico" aria-hidden="true">📅</span><span class="ab-val" id="abAgeVal">—</span><span class="ab-label">Age</span></button><button type="button" class="ab-item" id="abHt" onclick="openActionPopover('ht')"><span class="ab-ico" aria-hidden="true">📏</span><span class="ab-val" id="abHtVal">—</span><span class="ab-label">Height</span></button><button type="button" class="ab-item fav" id="abFav" onclick="openActionPopover('fav')"><span class="ab-ico" aria-hidden="true">⭐</span><span class="ab-val">&nbsp;</span><span class="ab-label">Favorites</span></button></div><div class="ab-popover" id="abPopover" role="dialog" aria-modal="false"></div><div class="disclaimer">Reference display only. Verify doses and protocols against your institutional standards before clinical use. Peds age/height resolve to weight via Broselow-Luten; adults use entered weight (TBW) and switch to Devine IBW only for entries flagged in the JSON as IBW-linked AND when BMI > 25. Calculated lines are arithmetic applied to an explicit JSON entry and never replace the exact formula shown above.</div></section><div class="modal-backdrop" id="adultModal" role="dialog" aria-modal="true" aria-labelledby="adultModalTitle">
   <div class="modal">
     <h2 id="adultModalTitle">🧑 Adult intake</h2>
     <p class="modal-sub">Use Ideal Body Weight (Devine) for lean-mass drugs when BMI &gt; 25, or total body weight only.</p>
@@ -452,7 +540,11 @@ function renderCategory(cat,index){
   const subs=cat.subCategories||[];const itemCount=subs.reduce((n,sc)=>n+(sc.items||[]).length,0);
   const match=!query||categoryHaystack(cat).includes(query);if(query&&!match)return '';
   const collapsed=query?'':' collapsed';
-  let h=`<section class="category${collapsed}" id="cat-${index}"><button class="category-head" onclick="toggleCategory(${index})"><span class="emoji">${EMOJI[cat.name]||'📋'}</span><span class="cat-title">${esc(cat.name)}</span><span class="cat-count">${itemCount} entr${itemCount===1?'y':'ies'}</span><span class="arrow">▾</span></button><div class="category-body">`;
+  // Color cycle c1..c4 across the visible category list (deterministic by index)
+  const colorCls = 'c' + ((index % 4) + 1);
+  // The square shows the leading character(s) of the category name (no emoji per screenshot)
+  const initial = (cat.name||'').trim().charAt(0).toUpperCase() || '•';
+  let h=`<section class="category${collapsed}" id="cat-${index}"><button class="cat-row" onclick="toggleCategory(${index})" aria-expanded="${query ? 'true' : 'false'}"><span class="cat-square ${colorCls}">${esc(initial)}</span><span class="cat-name">${esc(cat.name)}<span class="cat-meta">${itemCount} entr${itemCount===1?'y':'ies'}</span></span><span class="cat-chevron">▾</span></button><div class="category-body">`;
   if(!subs.length)h+='<div class="empty">This category is present in the JSON but has no subcategories/items.</div>';
   for(const [si,sc] of subs.entries()){
     const items=sc.items||[];h+=`<div class="subcategory"><div class="subcategory-title">${esc(sc.name||'Unnamed subcategory')} · ${items.length} entr${items.length===1?'y':'ies'}</div>`;
@@ -485,14 +577,14 @@ function ibwBadge(){
 
 function render(){
   if(!currentGroup)return;const g=GROUPS[currentGroup],data=g.data,s=stats(data);
-  $('groupTitle').textContent=`${g.icon} ${g.label}`;$('groupTitle').style.color=g.accent;
-  let desc=`JSON-backed reference · ${s.categories} categories · ${s.items} entries · ${s.doses} dosage records`;
+  $('groupTitle').textContent = 'Categories';
+  let desc=`${s.categories} categories · ${s.items} entries · ${s.doses} dosages`;
   if(currentGroup==='pedi'){
-    desc = `${s.categories} categories · ${s.items} entries · ${s.doses} dosage records — age/height resolve to weight via Broselow-Luten`;
+    desc = `${s.categories} categories · ${s.items} entries · ${s.doses} dosages — age/height → weight via Broselow-Luten`;
   } else if(currentGroup==='adult'){
-    desc = `${s.categories} categories · ${s.items} entries · ${s.doses} dosage records — weight required; IBW used when flagged AND BMI > 25`;
+    desc = `${s.categories} categories · ${s.items} entries · ${s.doses} dosages — IBW when flagged AND BMI > 25`;
   } else if(currentGroup==='neonatal'){
-    desc = `${s.categories} categories · ${s.items} entries · ${s.doses} dosage records — gestational-age based`;
+    desc = `${s.categories} categories · ${s.items} entries · ${s.doses} dosages — gestational-age based`;
   }
   $('groupDesc').textContent=desc;
   // Unit-aware weight/height rendering on the main bar
@@ -526,6 +618,8 @@ function render(){
   $('coverage').insertAdjacentHTML('beforeend', ibwBadge());
   const body=(data.categories||[]).map(renderCategory).join('');$('results').innerHTML=body||'<div class="no-results">No JSON entries match that search.</div>';
   document.querySelectorAll('.switcher button').forEach(b=>b.classList.toggle('active',b.dataset.group===currentGroup));
+  // v10: keep the floating action bar in sync with the canonical state
+  updateActionBar();
 }
 
 function toggleCategory(i){const el=$(`cat-${i}`);if(el)el.classList.toggle('collapsed');}
@@ -778,6 +872,200 @@ function commitAdultModal(){
   window.scrollTo(0,0);
 }
 function showHome(){$('app').style.display='none';$('home').style.display='flex';currentGroup=null;}
+
+// ============================================================
+// v10: action-bar + popover (weight/age/height quick view)
+// ============================================================
+
+function abValWeight(){
+  if(weightKg == null || !Number.isFinite(weightKg) || weightKg <= 0) return '—';
+  if(currentUnits === 'imperial') return `${(Math.round(kgToLb(weightKg)*10)/10).toFixed(1)} lb`;
+  return `${(Math.round(weightKg*10)/10).toFixed(1)} kg`;
+}
+function abValAge(){
+  if(ageYr == null || !Number.isFinite(ageYr) || ageYr < 0) return '—';
+  // 7y 6m formatting like the screenshot
+  if(ageYr < 2){
+    const mo = Math.round(ageYr * 12);
+    return `${mo}mo`;
+  }
+  const yr = Math.floor(ageYr);
+  const mo = Math.round((ageYr - yr) * 12);
+  if(mo === 0) return `${yr}y`;
+  return `${yr}y ${mo}m`;
+}
+function abValHeight(){
+  if(heightCm == null || !Number.isFinite(heightCm) || heightCm <= 0) return '—';
+  if(currentUnits === 'imperial'){
+    const fi = cmToFtIn(heightCm);
+    if(fi.inches === 0) return `${fi.ft}'0"`;
+    return `${fi.ft}'${fi.inches}"`;
+  }
+  return `${(Math.round(heightCm*10)/10).toFixed(1)} cm`;
+}
+function updateActionBar(){
+  const w = $('abWtVal'); if(w) w.textContent = abValWeight();
+  const a = $('abAgeVal'); if(a) a.textContent = abValAge();
+  const h = $('abHtVal'); if(h) h.textContent = abValHeight();
+}
+function closeActionPopover(){ $('abPopover').classList.remove('open'); }
+
+function openActionPopover(kind){
+  const pop = $('abPopover');
+  // Toggle: if same kind is already open, close it
+  if(pop.classList.contains('open') && pop.dataset.kind === kind){
+    closeActionPopover(); return;
+  }
+  pop.dataset.kind = kind;
+  let body = '';
+  if(kind === 'wt'){
+    const im = currentUnits === 'imperial';
+    body = `
+      <h3>Patient weight</h3>
+      <div class="ab-row">
+        <label>Weight</label>
+        <input id="popWt" type="number" min="0.1" max="${im?'600':'300'}" step="0.1" value="${im?(Math.round(kgToLb(weightKg)*10)/10).toFixed(1):(Math.round(weightKg*10)/10).toFixed(1)}">
+        <span style="font-size:.75rem;color:#6b7280">${im?'lb':'kg'}</span>
+      </div>
+      <div class="ab-row" style="margin-top:6px">
+        <label>Units</label>
+        <div class="ab-fields" style="flex:1">
+          <button type="button" id="popMetric" class="ab-cancel" style="${im?'':'background:#1d6ff0;color:#fff'}">Metric</button>
+          <button type="button" id="popImp" class="ab-cancel" style="${im?'background:#1d6ff0;color:#fff':''}">Imperial</button>
+        </div>
+      </div>`;
+  } else if(kind === 'age'){
+    const yr = ageYr != null && Number.isFinite(ageYr) ? (ageYr < 1 ? Math.round(ageYr*12) : (Math.round(ageYr*10)/10)) : '';
+    const unit = ageYr != null && ageYr < 1 ? 'mo' : 'yr';
+    body = `
+      <h3>Patient age</h3>
+      <div class="ab-row">
+        <label>Age</label>
+        <input id="popAge" type="number" min="0" max="120" step="0.1" value="${yr}">
+        <select id="popAgeUnit">
+          <option value="yr" ${unit==='yr'?'selected':''}>years</option>
+          <option value="mo" ${unit==='mo'?'selected':''}>months</option>
+        </select>
+      </div>
+      <p style="font-size:.65rem;color:#6b7280;margin:8px 0 0">Peds only: age resolves to a Broselow-Luten weight.</p>`;
+  } else if(kind === 'ht'){
+    const im = currentUnits === 'imperial';
+    let hVal = '', ftVal = '', inVal = '';
+    if(heightCm != null && Number.isFinite(heightCm) && heightCm > 0){
+      if(im){
+        const fi = cmToFtIn(heightCm); ftVal = fi.ft; inVal = fi.inches;
+      } else {
+        hVal = (Math.round(heightCm*10)/10).toFixed(1);
+      }
+    }
+    body = `
+      <h3>Patient height</h3>
+      <div class="ab-row" id="popHtRowMetric" style="${im?'display:none':''}">
+        <label>Height</label>
+        <input id="popHtCm" type="number" min="30" max="230" step="0.5" value="${hVal}" placeholder="cm">
+        <span style="font-size:.75rem;color:#6b7280">cm</span>
+      </div>
+      <div class="ab-row" id="popHtRowImp" style="${im?'':'display:none'}">
+        <label>Height</label>
+        <input id="popHtFt" type="number" min="1" max="8" step="1" value="${ftVal}" placeholder="ft" style="width:60px">
+        <span style="font-size:.75rem;color:#6b7280">ft</span>
+        <input id="popHtIn" type="number" min="0" max="11.9" step="0.5" value="${inVal}" placeholder="in" style="width:60px">
+        <span style="font-size:.75rem;color:#6b7280">in</span>
+      </div>
+      <div class="ab-row" style="margin-top:6px">
+        <label>Units</label>
+        <div class="ab-fields" style="flex:1">
+          <button type="button" id="popMetric" class="ab-cancel" style="${im?'':'background:#1d6ff0;color:#fff'}">Metric</button>
+          <button type="button" id="popImp" class="ab-cancel" style="${im?'background:#1d6ff0;color:#fff':''}">Imperial</button>
+        </div>
+      </div>
+      <p style="font-size:.65rem;color:#6b7280;margin:8px 0 0">Peds: height resolves to Broselow-Luten weight. Adults: feeds Devine IBW.</p>`;
+  } else if(kind === 'fav'){
+    body = `
+      <h3>Favorites</h3>
+      <p style="font-size:.78rem;color:#374151;margin:6px 0 0">Star any drug or category to find it instantly. Coming in a follow-up deploy.</p>`;
+  }
+  body += `
+    <div class="ab-actions">
+      <button type="button" class="ab-cancel" onclick="closeActionPopover()">Close</button>
+      ${kind !== 'fav' ? '<button type="button" class="ab-ok" id="popOk">Apply</button>' : ''}
+    </div>`;
+  pop.innerHTML = body;
+  pop.classList.add('open');
+  // Wire up the unit toggles in the popover (if present)
+  const pm = $('popMetric'), pi = $('popImp');
+  if(pm && pi){
+    pm.addEventListener('click',()=>{ currentUnits='metric'; closeActionPopover(); openActionPopover(kind); });
+    pi.addEventListener('click',()=>{ currentUnits='imperial'; closeActionPopover(); openActionPopover(kind); });
+  }
+  // Apply button: write popover values back into the canonical state + render
+  const ok = $('popOk');
+  if(ok){
+    ok.addEventListener('click',()=>{
+      if(kind === 'wt'){
+        const v = num($('popWt').value);
+        if(v == null || v <= 0) return;
+        weightKg = currentUnits === 'imperial' ? lbToKg(v) : v;
+        weightSrc = 'kg';
+        ageYr = null;
+      } else if(kind === 'age'){
+        const v = num($('popAge').value);
+        if(v == null || v <= 0) return;
+        const u = $('popAgeUnit').value;
+        const yr = u === 'mo' ? v/12 : v;
+        ageYr = yr;
+        if(currentGroup === 'pedi'){
+          weightKg = kgFromAge(yr);
+          weightSrc = 'age';
+          const br = findBroselow(weightKg);
+          heightCm = Math.round((br.lenLo+br.lenHi)/2);
+        }
+      } else if(kind === 'ht'){
+        let cm = null;
+        if(currentUnits === 'imperial'){
+          const ft = num($('popHtFt').value) || 0;
+          const inches = num($('popHtIn').value) || 0;
+          cm = ftInToCm(ft, inches);
+        } else {
+          cm = num($('popHtCm').value);
+        }
+        if(cm == null || cm <= 0) return;
+        heightCm = cm;
+        if(currentGroup === 'pedi'){
+          weightKg = kgFromHeight(cm);
+          weightSrc = 'height';
+          ageYr = null;
+        }
+      }
+      closeActionPopover();
+      render();
+    });
+  }
+}
+
+// v10: References panel — shows the data source + key citations
+function showReferences(){
+  closeActionPopover();
+  const pop = $('abPopover');
+  pop.dataset.kind = 'ref';
+  const items = [
+    'Broselow-Luten 2012 pediatric emergency tape (length→weight)',
+    'PALS 2020 dosing guidelines',
+    'ATLS 10th edition trauma protocols',
+    'Devine BJ. Gentamicin therapy. Drug Intell Clin Pharm. 1974;8:650-655 (IBW)',
+    'All clinical values are stored byte-for-byte in data_pedi.json, data_adult.json, data_neonatal.json',
+    'Calculated lines are arithmetic on the JSON entry — never replace the exact formula shown above'
+  ];
+  pop.innerHTML = `
+    <h3>References & data sources</h3>
+    <ul style="margin:6px 0 0;padding-left:18px;font-size:.78rem;color:#374151;line-height:1.5">
+      ${items.map(t=>`<li>${esc(t)}</li>`).join('')}
+    </ul>
+    <div class="ab-actions">
+      <button type="button" class="ab-ok" onclick="closeActionPopover()">Done</button>
+    </div>`;
+  pop.classList.add('open');
+}
 
 function init(){
   updateHome();
