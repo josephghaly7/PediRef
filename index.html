@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef v10.2 · STAT EM-style vitals UI</title><style>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef v10.3 · STAT EM-style vitals UI (clean)</title><style>
 :root{color-scheme:dark;--bg:#0b1020;--panel:#131b31;--panel2:#18233d;--line:#2a395d;--text:#edf2ff;--muted:#9aa9c7;--accent:#8ea7ff;--green:#57d68d;--yellow:#f6cf65;--red:#ff7474;--cat1:#1da1f2;--cat2:#ff8a3d;--cat3:#5cba47;--cat4:#e23aa6}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
@@ -168,8 +168,6 @@ details.raw{margin-top:8px}details.raw summary{cursor:pointer;color:#7181a3;font
 #app .volume{font-size:.65rem;color:#4b5563;line-height:1.4}
 #app .volume::before{content:"\21b3 ";color:#0a7c2f}
 #app details.raw{margin-top:8px}
-#app details.raw summary{cursor:pointer;color:#6b7280;font-size:.62rem}
-#app details.raw pre{margin:6px 0 0;max-height:280px;overflow:auto;white-space:pre-wrap;word-break:break-word;color:#374151;background:#f3f4f6;border-radius:7px;padding:8px;font:11px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace}
 #app .threshold{margin-top:8px;border-left:3px solid #1d6ff0;background:#eff6ff;border-radius:0 8px 8px 0;padding:8px 10px}
 #app .threshold-head{font-size:.65rem;color:#1d6ff0;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:flex;justify-content:space-between;gap:6px}
 #app .threshold-head .pick{color:#0a7c2f;font-weight:800;text-transform:none;letter-spacing:0;font-size:.72rem}
@@ -204,12 +202,6 @@ details.raw{margin-top:8px}details.raw summary{cursor:pointer;color:#7181a3;font
 #app .vital-row:active{background:#f7f8fa}
 #app .vital-row .vital-name{flex:1;font-size:1rem;font-weight:600;color:#111;letter-spacing:-.005em}
 #app .vital-row .vital-val{font-size:1.35rem;font-weight:800;color:#0a7c2f;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
-#app .vital-row .vital-toggle{flex:0 0 auto;width:32px;height:32px;border-radius:8px;background:#cfe5fa;color:#1d6ff0;border:0;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s}
-#app .vital-row .vital-toggle:active{background:#b8d6f3}
-#app details.vital-table-wrap{margin:0 16px;padding:0}
-#app details.vital-table-wrap[open]{padding:6px 0 8px}
-#app details.vital-table-wrap summary{display:none}
-#app details.prose-table{margin:0 16px 8px}
 #app .disclaimer{max-width:760px;margin:14px auto 130px;padding:10px 16px;color:#6b7280;font-size:.62rem;line-height:1.5;text-align:center}
 @media(min-width:700px){#app #results{padding:0 24px 130px}}
 </style></head><body><section id="home"><h1 class="brand">PediRef</h1><p class="tagline">The uploaded JSON is the source of truth. Every category, item, dose, algorithm, table, note, and raw entry is retained.</p><div class="group-grid"><button class="group-card" data-group="neonatal" onclick="loadGroup('neonatal')"><span class="group-icon">👶</span><span><span class="group-name">NEONATES</span><br><span class="group-desc">Neonatal resuscitation, gestational-age estimates, emergency meds, oxygen targets, UVC, and seizures.</span></span><span class="group-count" id="count-neonatal"></span></button><button class="group-card" data-group="pedi" onclick="loadGroup('pedi')"><span class="group-icon">🧒</span><span><span class="group-name">PEDS</span><br><span class="group-desc">All pediatric categories and entries from data_pedi.json, including doses and non-drug reference content.</span></span><span class="group-count" id="count-pedi"></span></button><button class="group-card" data-group="adult" onclick="loadGroup('adult')"><span class="group-icon">🧑</span><span><span class="group-name">ADULTS</span><br><span class="group-desc">All adult categories and entries from data_adult.json, including doses, algorithms, and tables.</span></span><span class="group-count" id="count-adult"></span></button></div><p class="source-note">No hand-coded clinical formulary is used by this view. The three uploaded JSON objects are bundled offline in this file and rendered without dropping non-dosage entries. Peds: age/height resolve to weight via Broselow-Luten. Adults: weight is required; IBW is computed from height+sex (Devine).</p></section><section id="app"><header class="topbar"><button class="back" onclick="showHome()" aria-label="Back to groups"></button><div class="top-title"><h1 id="groupTitle">Categories</h1><p id="groupDesc"></p></div><button type="button" class="ref-link" onclick="showReferences()">References</button></header><div class="controls"><div class="search-wrap"><span class="mag" aria-hidden="true">🔍</span><input class="search" id="search" type="search" placeholder="categories, medications, equipment, etc" autocomplete="off"></div></div><div id="hiddenControls" style="display:none!important;visibility:hidden" aria-hidden="true"><input id="weight" type="number" min="0.1" max="300" step="0.1" value="15"><span id="weightUnit">kg</span><input id="age" type="number" min="0" max="120" step="0.1" placeholder="yr/mo"><select id="au"><option value="yr" selected>yr</option><option value="mo">mo</option></select><input id="height" type="number" min="30" max="230" step="0.5" placeholder="cm"><span id="heightUnitLabel">cm</span><input id="heightFt" type="number" min="1" max="8" step="1" placeholder="ft"><input id="heightIn" type="number" min="0" max="11.9" step="0.1" placeholder="in"><div id="heightBoxMetric"></div><div id="heightBoxImperial" class="modal-hidden"></div><button type="button" id="unitsMetric"></button><button type="button" id="unitsImperial"></button><select id="sex"><option value="male" selected>male</option><option value="female">female</option></select></div>
@@ -334,8 +326,7 @@ function num(v){const n=parseFloat(String(v??'').trim());return Number.isFinite(
 function fmt(n){if(!Number.isFinite(n))return '';const r=Math.round((n+Number.EPSILON)*1000)/1000;return String(r);}
 function stats(data){let subs=0,items=0,doses=0;for(const c of data.categories||[]){for(const sc of c.subCategories||[]){subs++;items+=(sc.items||[]).length;for(const i of sc.items||[])doses+=(i.dosages||[]).length;}}return{categories:(data.categories||[]).length,subs,items,doses};}
 function updateHome(){for(const [key,g] of Object.entries(GROUPS)){const s=stats(g.data);const el=$(`count-${key}`);if(el)el.textContent=`${s.categories} categories · ${s.items} entries`;}}
-function raw(obj){return `<details class="raw"><summary>Show exact JSON for this entry</summary><pre>${esc(JSON.stringify(obj,null,2))}</pre></details>`;}
-
+function fmt(x){return Number.isFinite(x)?x.toFixed(1):'—';}
 // === Broselow-Luten resolvers (Peds only). ===
 function findBroselow(kg){for(const b of BROSLOW)if(kg>=b.kgLo&&kg<=b.kgHi)return b;let best=BROSLOW[0];for(const b of BROSLOW)if(Math.abs(b.kg-kg)<Math.abs(best.kg-kg))best=b;return best;}
 function kgFromAge(age){for(const b of BROSLOW)if(age>=b.ageLo&&age<b.ageHi)return b.doseKg;if(age<0.25)return 3.5;if(age<.42)return 6;if(age<1)return 8;if(age<2)return 10;if(age<3)return 12;if(age<4)return 15;if(age<6)return 20;if(age<9)return 25;if(age<11)return 35;return 50;}
@@ -530,51 +521,38 @@ function renderItem(item){
   if(item.vals){
     thresholdRows = parseThresholdPairs(item.vals);
     if(thresholdRows){
-      // v10.2 — STAT EM compact row: vital name + selected value (big, blue) + button to reveal the full band table
-      // Rendered above the item's prose so the picked value is the primary visual.
-      const tableHtml = renderThresholdTable(thresholdRows, 'Selected by weight (kg cutoff)');
-      h += renderCompactVitalsRow(item, thresholdRows, tableHtml, 'vals');
+      // v10.3 — STAT EM compact row: vital name + selected value (big, bold). No table.
+      h += renderCompactVitalsRow(item, thresholdRows, null, 'vals');
     } else {
       h+=`<div class="value-block"><b>Values:</b> ${esc(item.vals)}</div>`;
     }
   }
-  if(Array.isArray(item.information))h+=list(item.information,'info-line');
-  if(Array.isArray(item.information) && item.information.length){
+  if(Array.isArray(item.information)){
+    h+=list(item.information,'info-line');
     const proseRows = parseProseWeightBands(item.information);
-    if(proseRows){
-      const tableHtml = renderThresholdTable(proseRows, 'Selected by weight (prose from information[])');
-      // Only render a compact row when there's no vals-based row above (avoid double-display)
-      if(!thresholdRows){
-        h += renderCompactVitalsRow(item, proseRows, tableHtml, 'prose');
-      } else {
-        // Hide the prose table inside a collapsed details element to keep the STAT-EM look uncluttered.
-        h += `<details class="raw prose-table"><summary>Show prose weight bands</summary>${tableHtml}</details>`;
-      }
+    // Only show a compact row from prose if there's no vals-based row above (avoid double-display).
+    // Suppress prose-table rendering entirely; the band table is no longer surfaced per Greg's request.
+    if(proseRows && !thresholdRows){
+      h += renderCompactVitalsRow(item, proseRows, null, 'prose');
     }
   }
   if(Array.isArray(item.notes))h+=list(item.notes,'item-note');
   if(Array.isArray(item.steps)&&item.steps.length)h+=`<ul class="steps">${item.steps.map(s=>renderStep(s, item.ibw===true)).join('')}</ul>`;
   if(Array.isArray(item.dosages)&&item.dosages.length)h+=item.dosages.map(d=>renderDose(d, item.ibw===true)).join('');
-  h+=raw(item)+'</article>';
+  h+='</article>';
   return h;
 }
 
-// v10.2: STAT EM-style compact row for items that have a parseable weight-threshold table.
-// Renders the picked value big-and-blue in a horizontal row with a "Show band table" button.
-// Source table is hidden inside a <details> element until the user taps the button.
-function renderCompactVitalsRow(item, rows, tableHtml, source){
+// v10.3: STAT EM-style compact row for items that have a parseable weight-threshold table.
+// Renders the picked value big-and-bold in a horizontal row. No toggle, no hidden table —
+// just the resolved value at the current weight, matching STAT EM's flat-list look.
+function renderCompactVitalsRow(item, rows, _tableHtml, source){
   const picked = pickThreshold(rows, weightKg);
   const pickedLabel = picked ? picked.label : '—';
-  const weightTxt = (Number.isFinite(weightKg) && weightKg > 0) ? fmt(weightKg) : '—';
-  const safeId = 'tbl_' + Math.random().toString(36).slice(2,8);
-  // Compact row: name on left, picked value big blue on the right, expand button on the far right.
-  // Mirrors STAT EM's pattern: vitals are shown as a flat list with a single resolved value per weight.
   let html = `<div class="vital-row ${source}">`;
   html += `<span class="vital-name">${esc(item.name||'')}</span>`;
   html += `<span class="vital-val">${esc(pickedLabel)}</span>`;
-  html += `<button type="button" class="vital-toggle" onclick="document.getElementById('${safeId}').open=!document.getElementById('${safeId}').open" aria-label="Show threshold table">${picked?'▾':'·'}</button>`;
   html += `</div>`;
-  html += `<details id="${safeId}" class="vital-table-wrap"><summary style="display:none"></summary>${tableHtml}</details>`;
   return html;
 }
 

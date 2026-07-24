@@ -1,5 +1,5 @@
-// PediRef v15.20 — updated 2026-07-24 (v10.2: STAT EM-style vitals UI - compact row with picked value, source table behind details)
-const CACHE = 'pediref-v15_20';
+// PediRef v15.21 — updated 2026-07-24 (v10.3: drop threshold table and JSON disclosure; pure STAT EM compact row)
+const CACHE = 'pediref-v15_21';
 const ASSETS = [
   '/',
   '/index.html',
