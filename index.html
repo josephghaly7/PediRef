@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef v10.6 · STAT EM-style meds (mg/kg rate, fixed gate)</title><style>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef v10.7 · STAT EM-style meds (pink pairs + bordered box)</title><style>
 :root{color-scheme:dark;--bg:#0b1020;--panel:#131b31;--panel2:#18233d;--line:#2a395d;--text:#edf2ff;--muted:#9aa9c7;--accent:#8ea7ff;--green:#57d68d;--yellow:#f6cf65;--red:#ff7474;--cat1:#1da1f2;--cat2:#ff8a3d;--cat3:#5cba47;--cat4:#e23aa6}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
@@ -159,15 +159,15 @@ details.raw{margin-top:8px}details.raw summary{cursor:pointer;color:#7181a3;font
 #app .steps{margin:7px 0 0;padding:0;list-style:none}
 #app .step{font-size:.72rem;line-height:1.5;color:#1f2937;padding:3px 0;white-space:pre-wrap}
 #app .step.title{color:#1d6ff0;font-weight:800;padding-top:7px}
-#app .dose{margin-top:8px;border-left:3px solid #0a7c2f;background:#f0fdf4;border-radius:0 8px 8px 0;padding:8px 10px}
-#app .dose-label{font-size:.65rem;color:#1d6ff0;font-weight:800;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
-#app .dose-main{font-size:.82rem;color:#111;font-weight:700;line-height:1.4}
-#app .dose-rate{font-size:.7rem;color:#6b7280;font-weight:600;margin-top:2px;letter-spacing:-.005em}
-#app .dose-detail{font-size:.65rem;color:#4b5563;line-height:1.45;margin-top:3px}
-#app .dose-calc{font-size:.7rem;color:#0a7c2f;font-weight:700;margin-top:5px}
-#app .volumes{margin-top:5px}
-#app .volume{font-size:.65rem;color:#4b5563;line-height:1.4}
-#app .volume::before{content:"\21b3 ";color:#0a7c2f}
+#app .dose{margin-top:10px;padding:0;background:transparent}
+#app .dose-label{font-size:.85rem;color:#1d6ff0;font-weight:800;padding:4px 0 2px;letter-spacing:.01em}
+#app .dose-pair{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;font-size:1.05rem;font-weight:700;color:#e83aa6;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+#app .dose-pair .left{flex:0 0 auto;text-align:left}
+#app .dose-pair .right{flex:0 0 auto;text-align:right;margin-left:8px}
+#app .dose-box{border:1px solid #d1d5db;border-radius:6px;padding:8px 10px;margin-top:2px;display:flex;justify-content:space-between;align-items:baseline;font-size:1.05rem;font-weight:700;color:#e83aa6;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+#app .dose-box .left{flex:0 0 auto;text-align:left}
+#app .dose-box .right{flex:0 0 auto;text-align:right;margin-left:8px}
+#app .dose-calc{font-size:.72rem;color:#0a7c2f;font-weight:700;padding:6px 0 0}
 #app details.raw{margin-top:8px}
 #app .threshold{margin-top:8px;border-left:3px solid #1d6ff0;background:#eff6ff;border-radius:0 8px 8px 0;padding:8px 10px}
 #app .threshold-head{font-size:.65rem;color:#1d6ff0;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:flex;justify-content:space-between;gap:6px}
@@ -396,39 +396,49 @@ function doseWeight(d, ibwLinked){
   return null;
 }
 
-function calculatedDose(d, ibwLinked){
+// Returns { lo, hi, basis, w, mult, unit } for a dose or null if not calculable.
+// Centralizes the math so renderDose and calculatedDose stay in sync.
+function doseCalcParts(d, ibwLinked){
   const mult=Array.isArray(d.multipliers)?d.multipliers:[];
   const formula=(text(d.formula)+' '+text(d.rangeUnit)).toLowerCase();
-  const lo=num(d.range1),hi=num(d.range2===''||d.range2==null?d.range1:d.range2);
-  if(lo===null||hi===null||!Number.isFinite(weightKg))return '';
-  // Fixed dose (no multipliers): display "Fixed dose: X unit"
-  if(!mult.length){
-    const amount = lo===hi ? `${fmt(lo)}` : `${fmt(lo)}–${fmt(hi)}`;
-    const unit = d.unit ? ` ${esc(d.unit)}` : '';
-    return `<div class="dose-calc">Fixed dose: ${amount}${unit}</div>`;
+  const lo=num(d.range1);
+  const hi=num(d.range2===''||d.range2==null?d.range1:d.range2);
+  if(lo===null||hi===null||!Number.isFinite(weightKg))return null;
+  const fixed = !mult.length || !formula.includes('/kg') || !mult.includes('kg');
+  let a, b, w = null, basis = 'TBW';
+  if(fixed){
+    a = lo; b = hi;
+  } else {
+    w = doseWeight(d, ibwLinked);
+    if(w == null || !Number.isFinite(w)) return null;
+    a = lo * w;
+    b = hi * w;
   }
-  if(!formula.includes('/kg'))return '';
-  if(!mult.includes('kg'))return '';
-  const w = doseWeight(d, ibwLinked);
-  if(w == null || !Number.isFinite(w)) return '';
-  let a=lo*w,b=hi*w;
-  const mx=num(d.max);if(mx!==null){a=Math.min(a,mx);b=Math.min(b,mx);}
-  const result=a===b?fmt(a):`${fmt(a)}–${fmt(b)}`;
-  const unit=d.unit?` ${esc(d.unit)}`:'';
-  let basis = 'TBW';
+  const mx=num(d.max);
+  if(mx!==null){a=Math.min(a,mx);b=Math.min(b,mx);}
   if(ibwGateOpen(ibwLinked) && ibwForActive()!=null){
     const bmi = adultBmi();
     basis = `IBW (BMI ${bmi.toFixed(1)})`;
   }
-  return `<div class="dose-calc">At ${fmt(w)} kg (${basis}): ${result}${unit}${mx!==null?' (max from JSON applied)':''}</div>`;
+  return { lo:a, hi:b, basis, w, mult, unit: d.unit||'', maxed: mx!==null };
+}
+
+function calculatedDose(d, ibwLinked){
+  const parts = doseCalcParts(d, ibwLinked);
+  if(!parts) return '';
+  const { lo, hi, basis, w, unit, maxed } = parts;
+  if(w === null){
+    // Fixed-dose branch
+    const amount = lo===hi ? `${fmt(lo)}` : `${fmt(lo)}–${fmt(hi)}`;
+    return `<div class="dose-calc">Fixed dose: ${amount}${unit?` ${esc(unit)}`:''}</div>`;
+  }
+  const result = lo===hi ? fmt(lo) : `${fmt(lo)}–${fmt(hi)}`;
+  return `<div class="dose-calc">At ${fmt(w)} kg (${basis}): ${result}${unit?` ${esc(unit)}`:''}${maxed?' (max from JSON applied)':''}</div>`;
 }
 
 function renderDose(d, ibwLinked){
-  const amount=(d.range1!==undefined&&d.range1!=='')?`${text(d.range1)}${d.range2!==undefined&&d.range2!==''?`–${text(d.range2)}`:''}${d.unit?` ${text(d.unit)}`:''}`:'';
-  // Build the per-kg rate string. Prefer the JSON `formula` (e.g. "0.5-1 mg/kg")
-  // since it's the human-readable source of truth. Fall back to rangeUnit + range1/range2,
-  // then synthesize "${unit}/kg" from multipliers if both are missing.
-  // Skip for fixed-dose drugs (no kg multiplier).
+  // Build the per-kg rate string. Prefer JSON `formula`, fall back to rangeUnit,
+  // then synthesize from multipliers. Skip for fixed-dose drugs.
   const hasKgMult = Array.isArray(d.multipliers) && d.multipliers.includes('kg');
   let rateStr = '';
   if(hasKgMult){
@@ -443,10 +453,69 @@ function renderDose(d, ibwLinked){
       rateStr = `${lo}${hi} ${d.unit||''}/kg`.trim();
     }
   }
-  let h=`<div class="dose">${d.label?`<div class="dose-label">${esc(d.label)}</div>`:''}<div class="dose-main">${amount||'Dose entry'}</div>`;
-  if(rateStr) h+=`<div class="dose-rate">${esc(rateStr)}</div>`;
-  if(d.volumes&&d.volumes.length){h+='<div class="volumes">'+d.volumes.map(v=>`<div class="volume">${esc([v.value,v.unit].filter(x=>x!==undefined&&x!=='').join(' '))}${v.formula?` — ${esc(v.formula)}`:''}</div>`).join('')+'</div>';}
-  h+=calculatedDose(d, ibwLinked)+'</div>';return h;
+
+  // Compute the numeric total (lo, hi) so the pair row and box row match calculatedDose.
+  const parts = doseCalcParts(d, ibwLinked);
+  const loHiSame = parts && parts.lo === parts.hi;
+  const totalStr = parts ? (loHiSame ? fmt(parts.lo) : `${fmt(parts.lo)}–${fmt(parts.hi)}`) : '';
+
+  // Pair row right-hand:
+  //  - weight-based: total dose in d.unit (e.g. "0.17 mg")
+  //  - fixed-dose: same total dose (lo==hi) or dose range; STAT EM mirrors the dose itself
+  //  - no calc possible: empty
+  let pairRight = '';
+  if(parts){
+    if(d.unit) pairRight = `${totalStr} ${esc(d.unit)}`;
+    else pairRight = totalStr;
+  }
+  // Pair row left-hand:
+  //  - weight-based: rate string (e.g. "0.01 mg/kg")
+  //  - fixed-dose: show the same dose so STAT EM's "0.15 mg | 0.15 mg" appearance holds
+  let pairLeft = '';
+  if(parts){
+    if(hasKgMult && rateStr) pairLeft = esc(rateStr);
+    else pairLeft = (d.unit ? `${totalStr} ${esc(d.unit)}` : totalStr);
+  }
+
+  // Box row (concentration + computed mL). Uses the first volume entry.
+  // mL = totalDose / concentration(mg/mL).
+  let boxHtml = '';
+  if(parts && Array.isArray(d.volumes) && d.volumes.length){
+    const v = d.volumes[0];
+    const concStr = v.formula || '';                           // e.g. "1 mg/mL"
+    let mlStr = '';
+    // Parse concentration "X unit/mL" — pick first number + unit, divide lo by it.
+    const m = /([\d.]+)\s*([A-Za-z]+)\s*\/\s*mL/i.exec(concStr);
+    if(m){
+      const conc = parseFloat(m[1]);
+      const concUnit = m[2].toLowerCase();
+      const totalUnit = (d.unit||'').toLowerCase();
+      // Only compute if units match (mg/mL vs mg, mcg/mL vs mcg, units/mL vs units)
+      if(conc > 0 && concUnit === totalUnit){
+        // Use the lower bound of the calculated total for the volume
+        const mL = parts.lo / conc;
+        mlStr = fmt2(mL) + ' mL';
+      }
+    }
+    const leftText = concStr || [v.value, v.unit].filter(x=>x!==undefined && x!=='').join(' ');
+    boxHtml = `<div class="dose-box"><span class="left">${esc(leftText)}</span><span class="right">${esc(mlStr||'—')}</span></div>`;
+  }
+
+  let h = `<div class="dose">`;
+  if(d.label) h += `<div class="dose-label">${esc(d.label)}</div>`;
+  if(pairLeft || pairRight){
+    h += `<div class="dose-pair"><span class="left">${pairLeft||'&nbsp;'}</span><span class="right">${pairRight||'&nbsp;'}</span></div>`;
+  }
+  h += boxHtml;
+  h += calculatedDose(d, ibwLinked);
+  h += '</div>';
+  return h;
+}
+
+// 2-decimal formatter for computed volumes (e.g. 0.17 mL, 1.7 mL).
+function fmt2(x){
+  if(!Number.isFinite(x)) return '';
+  return String(Math.round((x + Number.EPSILON) * 100) / 100);
 }
 
 function renderStep(s, ibwLinked){

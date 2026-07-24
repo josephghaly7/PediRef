@@ -1,5 +1,5 @@
-// PediRef v15.24 — updated 2026-07-24 (v10.6: STAT EM-style meds; fix mg/kg rate gate — was hiding entries without rangeUnit)
-const CACHE = 'pediref-v15_24';
+// PediRef v15.25 — updated 2026-07-24 (v10.7: STAT EM-style dose cards — pink paired rows + bordered volume box + computed mL)
+const CACHE = 'pediref-v15_25';
 const ASSETS = [
   '/',
   '/index.html',
