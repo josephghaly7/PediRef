@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef v10.7 · STAT EM-style meds (pink pairs + bordered box)</title><style>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef v10.8 · STAT EM-style meds (fixed duplicate fmt — precision restored)</title><style>
 :root{color-scheme:dark;--bg:#0b1020;--panel:#131b31;--panel2:#18233d;--line:#2a395d;--text:#edf2ff;--muted:#9aa9c7;--accent:#8ea7ff;--green:#57d68d;--yellow:#f6cf65;--red:#ff7474;--cat1:#1da1f2;--cat2:#ff8a3d;--cat3:#5cba47;--cat4:#e23aa6}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
@@ -327,7 +327,6 @@ function num(v){const n=parseFloat(String(v??'').trim());return Number.isFinite(
 function fmt(n){if(!Number.isFinite(n))return '';const r=Math.round((n+Number.EPSILON)*1000)/1000;return String(r);}
 function stats(data){let subs=0,items=0,doses=0;for(const c of data.categories||[]){for(const sc of c.subCategories||[]){subs++;items+=(sc.items||[]).length;for(const i of sc.items||[])doses+=(i.dosages||[]).length;}}return{categories:(data.categories||[]).length,subs,items,doses};}
 function updateHome(){for(const [key,g] of Object.entries(GROUPS)){const s=stats(g.data);const el=$(`count-${key}`);if(el)el.textContent=`${s.categories} categories · ${s.items} entries`;}}
-function fmt(x){return Number.isFinite(x)?x.toFixed(1):'—';}
 // === Broselow-Luten resolvers (Peds only). ===
 function findBroselow(kg){for(const b of BROSLOW)if(kg>=b.kgLo&&kg<=b.kgHi)return b;let best=BROSLOW[0];for(const b of BROSLOW)if(Math.abs(b.kg-kg)<Math.abs(best.kg-kg))best=b;return best;}
 function kgFromAge(age){for(const b of BROSLOW)if(age>=b.ageLo&&age<b.ageHi)return b.doseKg;if(age<0.25)return 3.5;if(age<.42)return 6;if(age<1)return 8;if(age<2)return 10;if(age<3)return 12;if(age<4)return 15;if(age<6)return 20;if(age<9)return 25;if(age<11)return 35;return 50;}

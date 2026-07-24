@@ -1,5 +1,5 @@
-// PediRef v15.25 — updated 2026-07-24 (v10.7: STAT EM-style dose cards — pink paired rows + bordered volume box + computed mL)
-const CACHE = 'pediref-v15_25';
+// PediRef v15.26 — updated 2026-07-24 (v10.8: remove duplicate fmt() — was toFixed(1), hiding the precision-preserving fmt and rounding 0.23 to 0.2)
+const CACHE = 'pediref-v15_26';
 const ASSETS = [
   '/',
   '/index.html',
