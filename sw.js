@@ -1,5 +1,5 @@
-// PediRef v15.22 — updated 2026-07-24 (v10.4: STAT EM-style meds; drop formula text from dose cards)
-const CACHE = 'pediref-v15_22';
+// PediRef v15.23 — updated 2026-07-24 (v10.5: STAT EM-style meds; add explicit mg/kg rate line; drop formula/multiplier words)
+const CACHE = 'pediref-v15_23';
 const ASSETS = [
   '/',
   '/index.html',
