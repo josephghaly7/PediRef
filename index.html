@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef v10.5 · STAT EM-style meds (with mg/kg rate)</title><style>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef v10.6 · STAT EM-style meds (mg/kg rate, fixed gate)</title><style>
 :root{color-scheme:dark;--bg:#0b1020;--panel:#131b31;--panel2:#18233d;--line:#2a395d;--text:#edf2ff;--muted:#9aa9c7;--accent:#8ea7ff;--green:#57d68d;--yellow:#f6cf65;--red:#ff7474;--cat1:#1da1f2;--cat2:#ff8a3d;--cat3:#5cba47;--cat4:#e23aa6}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
@@ -426,16 +426,21 @@ function calculatedDose(d, ibwLinked){
 function renderDose(d, ibwLinked){
   const amount=(d.range1!==undefined&&d.range1!=='')?`${text(d.range1)}${d.range2!==undefined&&d.range2!==''?`–${text(d.range2)}`:''}${d.unit?` ${text(d.unit)}`:''}`:'';
   // Build the per-kg rate string. Prefer the JSON `formula` (e.g. "0.5-1 mg/kg")
-  // since it's already human-readable. Fall back to rangeUnit + range1/range2.
+  // since it's the human-readable source of truth. Fall back to rangeUnit + range1/range2,
+  // then synthesize "${unit}/kg" from multipliers if both are missing.
   // Skip for fixed-dose drugs (no kg multiplier).
-  const isWeightBased = Array.isArray(d.multipliers) && d.multipliers.includes('kg') && d.rangeUnit && d.rangeUnit.includes('/kg');
+  const hasKgMult = Array.isArray(d.multipliers) && d.multipliers.includes('kg');
   let rateStr = '';
-  if(isWeightBased){
+  if(hasKgMult){
     if(d.formula && /\/\s*kg/.test(d.formula)) rateStr = d.formula.trim();
-    else if(d.range1 !== undefined && d.range1 !== ''){
+    else if(d.rangeUnit && /\/\s*kg/.test(d.rangeUnit)){
       const lo = text(d.range1);
       const hi = (d.range2 !== undefined && d.range2 !== '') ? `–${text(d.range2)}` : '';
       rateStr = `${lo}${hi} ${d.rangeUnit}`;
+    } else if(d.range1 !== undefined && d.range1 !== ''){
+      const lo = text(d.range1);
+      const hi = (d.range2 !== undefined && d.range2 !== '') ? `–${text(d.range2)}` : '';
+      rateStr = `${lo}${hi} ${d.unit||''}/kg`.trim();
     }
   }
   let h=`<div class="dose">${d.label?`<div class="dose-label">${esc(d.label)}</div>`:''}<div class="dose-main">${amount||'Dose entry'}</div>`;

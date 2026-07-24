@@ -1,5 +1,5 @@
-// PediRef v15.23 — updated 2026-07-24 (v10.5: STAT EM-style meds; add explicit mg/kg rate line; drop formula/multiplier words)
-const CACHE = 'pediref-v15_23';
+// PediRef v15.24 — updated 2026-07-24 (v10.6: STAT EM-style meds; fix mg/kg rate gate — was hiding entries without rangeUnit)
+const CACHE = 'pediref-v15_24';
 const ASSETS = [
   '/',
   '/index.html',
