@@ -1,5 +1,5 @@
-// PediRef v15.19 — updated 2026-07-23 (v10.1: STAT EM picker rule — smallest lo ≥ weight)
-const CACHE = 'pediref-v15_19';
+// PediRef v15.20 — updated 2026-07-24 (v10.2: STAT EM-style vitals UI - compact row with picked value, source table behind details)
+const CACHE = 'pediref-v15_20';
 const ASSETS = [
   '/',
   '/index.html',
