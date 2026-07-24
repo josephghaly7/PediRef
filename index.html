@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef v10.9 · STAT EM-style meds (dropped "At X kg" green line)</title><style>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef v10.10 · STAT EM-style meds (slider + all concentrations + per-bottle mL)</title><style>
 :root{color-scheme:dark;--bg:#0b1020;--panel:#131b31;--panel2:#18233d;--line:#2a395d;--text:#edf2ff;--muted:#9aa9c7;--accent:#8ea7ff;--green:#57d68d;--yellow:#f6cf65;--red:#ff7474;--cat1:#1da1f2;--cat2:#ff8a3d;--cat3:#5cba47;--cat4:#e23aa6}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
@@ -164,10 +164,18 @@ details.raw{margin-top:8px}details.raw summary{cursor:pointer;color:#7181a3;font
 #app .dose-pair{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;font-size:1.05rem;font-weight:700;color:#e83aa6;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
 #app .dose-pair .left{flex:0 0 auto;text-align:left}
 #app .dose-pair .right{flex:0 0 auto;text-align:right;margin-left:8px}
-#app .dose-box{border:1px solid #d1d5db;border-radius:6px;padding:8px 10px;margin-top:2px;display:flex;justify-content:space-between;align-items:baseline;font-size:1.05rem;font-weight:700;color:#e83aa6;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+#app .dose-box{border:1px solid #d1d5db;border-radius:6px;padding:8px 10px;margin-top:4px;display:flex;justify-content:space-between;align-items:baseline;font-size:1.05rem;font-weight:700;color:#e83aa6;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+#app .dose-box:first-of-type{margin-top:6px}
 #app .dose-box .left{flex:0 0 auto;text-align:left}
 #app .dose-box .right{flex:0 0 auto;text-align:right;margin-left:8px}
 #app .dose-calc{font-size:.72rem;color:#0a7c2f;font-weight:700;padding:6px 0 0}
+/* v10.10 — segment slider for dose selection (STAT EM-style). */
+#app .dose-slider{display:flex;gap:0;margin-top:6px;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;background:#fff}
+#app .dose-slider button{flex:1;border:0;background:transparent;color:#1f2937;padding:7px 4px;font:inherit;font-size:.85rem;font-weight:700;cursor:pointer;transition:background .12s,color .12s;border-right:1px solid #d1d5db}
+#app .dose-slider button:last-child{border-right:0}
+#app .dose-slider button.active{background:#e9d5ff;color:#581c87}
+#app .dose-slider button:not(.active):active{background:#f3f4f6}
+#app .dose-slider-meta{font-size:.62rem;color:#6b7280;margin-top:3px;text-align:center;letter-spacing:.04em}
 #app details.raw{margin-top:8px}
 #app .threshold{margin-top:8px;border-left:3px solid #1d6ff0;background:#eff6ff;border-radius:0 8px 8px 0;padding:8px 10px}
 #app .threshold-head{font-size:.65rem;color:#1d6ff0;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:flex;justify-content:space-between;gap:6px}
@@ -436,7 +444,39 @@ function calculatedDose(d, ibwLinked){
   return '';
 }
 
-function renderDose(d, ibwLinked){
+// v10.10 — selected segment per dose. Key = doseKey (item+doseIdx). Default: first segment.
+const doseSelection = {};
+window.pickDoseSegment = function(doseKey, segIdx){
+  doseSelection[doseKey] = segIdx;
+  // Re-render the categories list. Cheap enough; no virtual DOM.
+  if(typeof render === 'function') render();
+};
+
+// Parse a concentration string like "1 mg/mL" or "0.63 mg/3 mL" (per-bottle).
+// Returns {conc, unit} where conc is in unit/mL (numeric), or null on failure.
+// Examples:
+//   "1 mg/mL"      -> {conc: 1, unit: "mg"}
+//   "0.63 mg/3 mL" -> {conc: 0.21, unit: "mg"}   (0.63/3 = 0.21 mg/mL)
+//   "50 mcg/mL"    -> {conc: 50, unit: "mcg"}
+function parseConcentration(concStr){
+  if(!concStr) return null;
+  const s = String(concStr).trim();
+  // Per-bottle:  "X unit / Y mL"  -> conc = X/Y (in unit/mL)
+  let m = /([\d.]+)\s*([A-Za-z]+)\s*\/\s*([\d.]+)\s*mL/i.exec(s);
+  if(m){
+    const x = parseFloat(m[1]); const u = m[2].toLowerCase(); const y = parseFloat(m[3]);
+    if(x > 0 && y > 0) return {conc: x / y, unit: u};
+  }
+  // Per-mL:      "X unit / mL"     -> conc = X (in unit/mL)
+  m = /([\d.]+)\s*([A-Za-z]+)\s*\/\s*mL/i.exec(s);
+  if(m){
+    const x = parseFloat(m[1]); const u = m[2].toLowerCase();
+    if(x > 0) return {conc: x, unit: u};
+  }
+  return null;
+}
+
+function renderDose(d, ibwLinked, doseKey){
   // Build the per-kg rate string. Prefer JSON `formula`, fall back to rangeUnit,
   // then synthesize from multipliers. Skip for fixed-dose drugs.
   const hasKgMult = Array.isArray(d.multipliers) && d.multipliers.includes('kg');
@@ -454,51 +494,70 @@ function renderDose(d, ibwLinked){
     }
   }
 
-  // Compute the numeric total (lo, hi) so the pair row and box row match calculatedDose.
+  // Selected segment (slider value). Default: minimum (first segment) to match STAT EM.
+  const segs = Array.isArray(d.segments) ? d.segments.filter(s => s !== '' && s !== undefined && s !== null) : [];
+  const hasSlider = segs.length >= 2;
+  const segIdx = (doseKey && Number.isInteger(doseSelection[doseKey]) && doseSelection[doseKey] < segs.length)
+    ? doseSelection[doseKey] : 0;
+  const segDose = hasSlider ? parseFloat(segs[segIdx]) : null;
+
+  // Compute the numeric total (lo, hi) from the SELECTED segment, not the full range.
   const parts = doseCalcParts(d, ibwLinked);
+  let selectedTotal = null;
+  if(hasSlider && parts && Number.isFinite(segDose)){
+    const w = parts.w;                                  // null for fixed-dose
+    selectedTotal = (w == null) ? segDose : segDose * w;
+    if(selectedTotal !== null){
+      const mx = num(d.max);
+      if(mx !== null && selectedTotal > mx) selectedTotal = mx;
+    }
+  }
+  const selectedTotalStr = (selectedTotal !== null) ? fmt(selectedTotal) : '';
   const loHiSame = parts && parts.lo === parts.hi;
   const totalStr = parts ? (loHiSame ? fmt(parts.lo) : `${fmt(parts.lo)}–${fmt(parts.hi)}`) : '';
 
-  // Pair row right-hand:
-  //  - weight-based: total dose in d.unit (e.g. "0.17 mg")
-  //  - fixed-dose: same total dose (lo==hi) or dose range; STAT EM mirrors the dose itself
-  //  - no calc possible: empty
-  let pairRight = '';
-  if(parts){
-    if(d.unit) pairRight = `${totalStr} ${esc(d.unit)}`;
-    else pairRight = totalStr;
-  }
-  // Pair row left-hand:
-  //  - weight-based: rate string (e.g. "0.01 mg/kg")
-  //  - fixed-dose: show the same dose so STAT EM's "0.15 mg | 0.15 mg" appearance holds
+  // Pair row: chosen dose total on the right; rate string (weight-based) on the left.
   let pairLeft = '';
-  if(parts){
-    if(hasKgMult && rateStr) pairLeft = esc(rateStr);
-    else pairLeft = (d.unit ? `${totalStr} ${esc(d.unit)}` : totalStr);
+  let pairRight = '';
+  if(hasSlider && selectedTotalStr){
+    pairRight = d.unit ? `${selectedTotalStr} ${esc(d.unit)}` : selectedTotalStr;
+    pairLeft = hasKgMult && rateStr ? esc(rateStr) : pairRight;
+  } else if(parts){
+    pairLeft = hasKgMult && rateStr ? esc(rateStr) : (d.unit ? `${totalStr} ${esc(d.unit)}` : totalStr);
+    pairRight = d.unit ? `${totalStr} ${esc(d.unit)}` : totalStr;
   }
 
-  // Box row (concentration + computed mL). Uses the first volume entry.
-  // mL = totalDose / concentration(mg/mL).
-  let boxHtml = '';
-  if(parts && Array.isArray(d.volumes) && d.volumes.length){
-    const v = d.volumes[0];
-    const concStr = v.formula || '';                           // e.g. "1 mg/mL"
-    let mlStr = '';
-    // Parse concentration "X unit/mL" — pick first number + unit, divide lo by it.
-    const m = /([\d.]+)\s*([A-Za-z]+)\s*\/\s*mL/i.exec(concStr);
-    if(m){
-      const conc = parseFloat(m[1]);
-      const concUnit = m[2].toLowerCase();
-      const totalUnit = (d.unit||'').toLowerCase();
-      // Only compute if units match (mg/mL vs mg, mcg/mL vs mcg, units/mL vs units)
-      if(conc > 0 && concUnit === totalUnit){
-        // Use the lower bound of the calculated total for the volume
-        const mL = parts.lo / conc;
-        mlStr = fmt2(mL) + ' mL';
+  // Box rows: one per volume entry. mL = selectedDose / concentration.
+  // When no slider, use the lower bound of the calculated range (parts.lo) as the dose.
+  const boxDose = (selectedTotal !== null) ? selectedTotal : (parts ? parts.lo : null);
+  let boxesHtml = '';
+  if(Array.isArray(d.volumes) && d.volumes.length){
+    const made = [];
+    for(const v of d.volumes){
+      const concStr = v.formula || '';
+      const leftText = concStr || [v.value, v.unit].filter(x=>x!==undefined && x!=='').join(' ');
+      let mlStr = '';
+      if(boxDose !== null){
+        const parsed = parseConcentration(concStr);
+        if(parsed && parsed.unit === (d.unit||'').toLowerCase() && parsed.conc > 0){
+          const mL = boxDose / parsed.conc;
+          mlStr = `${fmt2(mL)} mL`;
+        }
       }
+      made.push(`<div class="dose-box"><span class="left">${esc(leftText)}</span><span class="right">${esc(mlStr||'—')}</span></div>`);
     }
-    const leftText = concStr || [v.value, v.unit].filter(x=>x!==undefined && x!=='').join(' ');
-    boxHtml = `<div class="dose-box"><span class="left">${esc(leftText)}</span><span class="right">${esc(mlStr||'—')}</span></div>`;
+    boxesHtml = made.join('');
+  }
+
+  // Slider row (one per dose). Only rendered when segments has ≥2 entries.
+  let sliderHtml = '';
+  if(hasSlider && doseKey){
+    const buttons = segs.map((s, i) => {
+      const isActive = i === segIdx;
+      const label = hasKgMult ? `${s} ${esc(d.unit||'')}/kg` : (d.unit ? `${s} ${esc(d.unit)}` : s);
+      return `<button type="button" class="${isActive?'active':''}" onclick="pickDoseSegment('${esc(doseKey)}',${i})">${esc(label)}</button>`;
+    }).join('');
+    sliderHtml = `<div class="dose-slider">${buttons}</div>`;
   }
 
   let h = `<div class="dose">`;
@@ -506,7 +565,8 @@ function renderDose(d, ibwLinked){
   if(pairLeft || pairRight){
     h += `<div class="dose-pair"><span class="left">${pairLeft||'&nbsp;'}</span><span class="right">${pairRight||'&nbsp;'}</span></div>`;
   }
-  h += boxHtml;
+  h += sliderHtml;
+  h += boxesHtml;
   h += calculatedDose(d, ibwLinked);
   h += '</div>';
   return h;
@@ -518,8 +578,8 @@ function fmt2(x){
   return String(Math.round((x + Number.EPSILON) * 100) / 100);
 }
 
-function renderStep(s, ibwLinked){
-  if(s&&typeof s==='object'&&('range1'in s||'formula'in s||'volumes'in s))return renderDose(s, ibwLinked);
+function renderStep(s, ibwLinked, stepKey){
+  if(s&&typeof s==='object'&&('range1'in s||'formula'in s||'volumes'in s))return renderDose(s, ibwLinked, stepKey);
   if(s&&typeof s==='object'&&'algostep'in s)return `<li class="step${s.title?' title':''}">${esc(s.algostep)}</li>`;
   return `<li class="step">${esc(typeof s==='string'?s:JSON.stringify(s))}</li>`;
 }
@@ -619,8 +679,8 @@ function renderItem(item){
     }
   }
   if(Array.isArray(item.notes))h+=list(item.notes,'item-note');
-  if(Array.isArray(item.steps)&&item.steps.length)h+=`<ul class="steps">${item.steps.map(s=>renderStep(s, item.ibw===true)).join('')}</ul>`;
-  if(Array.isArray(item.dosages)&&item.dosages.length)h+=item.dosages.map(d=>renderDose(d, item.ibw===true)).join('');
+  if(Array.isArray(item.steps)&&item.steps.length)h+=`<ul class="steps">${item.steps.map((s,i)=>renderStep(s, item.ibw===true, `step__${(item.name||'').replace(/\W/g,'_')}__${i}`)).join('')}</ul>`;
+  if(Array.isArray(item.dosages)&&item.dosages.length)h+=item.dosages.map((d,i)=>renderDose(d, item.ibw===true, `dose__${(item.name||'').replace(/\W/g,'_')}__${i}`)).join('');
   h+='</article>';
   return h;
 }

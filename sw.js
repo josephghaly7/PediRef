@@ -1,5 +1,5 @@
-// PediRef v15.27 — updated 2026-07-24 (v10.9: drop redundant "At X kg (TBW): Y" green line under weight-based dose cards; keep "Fixed dose:" for fixed-dose cards)
-const CACHE = 'pediref-v15_27';
+// PediRef v15.18 — updated 2026-07-24 (v10.10: slider + all concentrations + per-bottle mL) (v9.6: imperial units lb/ft+in with auto-conversion)
+const CACHE = 'pediref-v15_18';
 const ASSETS = [
   '/',
   '/index.html',
