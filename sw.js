@@ -1,5 +1,5 @@
-// PediRef v15.26 — updated 2026-07-24 (v10.8: remove duplicate fmt() — was toFixed(1), hiding the precision-preserving fmt and rounding 0.23 to 0.2)
-const CACHE = 'pediref-v15_26';
+// PediRef v15.27 — updated 2026-07-24 (v10.9: drop redundant "At X kg (TBW): Y" green line under weight-based dose cards; keep "Fixed dose:" for fixed-dose cards)
+const CACHE = 'pediref-v15_27';
 const ASSETS = [
   '/',
   '/index.html',
