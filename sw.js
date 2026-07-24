@@ -1,5 +1,5 @@
-// PediRef v15.18 — updated 2026-07-23 (v10: iOS-style categories screen + action bar)
-const CACHE = 'pediref-v15_18';
+// PediRef v15.19 — updated 2026-07-23 (v10.1: STAT EM picker rule — smallest lo ≥ weight)
+const CACHE = 'pediref-v15_19';
 const ASSETS = [
   '/',
   '/index.html',
