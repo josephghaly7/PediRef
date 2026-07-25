@@ -7815,7 +7815,7 @@
                   "range2": "",
                   "unit": "mg",
                   "label": "\u25cf Q4-6 hrs",
-                  "formula": "650 mg/kg",
+                  "formula": "650 mg",
                   "max": "",
                   "multipliers": [],
                   "volumes": [

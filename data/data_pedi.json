@@ -4838,7 +4838,7 @@
                   "range2": "",
                   "unit": "mg",
                   "label": "\u25cf Most indications:",
-                  "formula": "2 mg/gk/dose Q12 hr",
+                  "formula": "2 mg/kg/dose Q12 hr",
                   "max": "100",
                   "multipliers": [
                     "kg"
@@ -14402,7 +14402,7 @@
                   "range2": "",
                   "unit": "mg",
                   "label": "Weight Based Dose:",
-                  "formula": "20 mg/mL",
+                  "formula": "20 mg/kg",
                   "max": "2000",
                   "multipliers": [
                     "kg"
