@@ -1,5 +1,5 @@
-// PediRef v15.18 — updated 2026-07-24 (v10.10: slider + all concentrations + per-bottle mL) (v9.6: imperial units lb/ft+in with auto-conversion)
-const CACHE = 'pediref-v15_18';
+// PediRef v15.19 — updated 2026-07-25 (v10.11: iOS Safari scroll-bounce fix)
+const CACHE = 'pediref-v15_19';
 const ASSETS = [
   '/',
   '/index.html',

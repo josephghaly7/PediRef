@@ -797,14 +797,27 @@ function render(){
   updateActionBar();
   // Restore scroll position so iOS Safari doesn't bounce the user back to the top
   // after tapping a dose-segment button or the weight Apply button.
-  // Use rAF so the browser has time to repaint before we restore.
-  requestAnimationFrame(() => {
+  // On iOS, the keyboard collapse + focus restoration can trigger scroll AFTER a
+  // single rAF. We need to win the race against the OS-level scroll restoration.
+  const restoreScroll = () => {
     window.scrollTo(0, savedScroll);
-    // Re-focus the dose segment button the user tapped, so keyboard / a11y stays sane.
     if(savedKey){
       const btn = document.querySelector(`[data-dose-key="${CSS.escape(savedKey)}"]`);
       if(btn) btn.focus({preventScroll: true});
     }
+  };
+  // Run restoreScroll aggressively: rAF + rAF + setTimeout chain covering up to 1s
+  restoreScroll();
+  requestAnimationFrame(() => {
+    restoreScroll();
+    requestAnimationFrame(() => {
+      restoreScroll();
+      setTimeout(restoreScroll, 50);
+      setTimeout(restoreScroll, 150);
+      setTimeout(restoreScroll, 300);
+      setTimeout(restoreScroll, 500);
+      setTimeout(restoreScroll, 1000);
+    });
   });
 }
 
