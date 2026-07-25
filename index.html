@@ -708,7 +708,9 @@ function categoryHaystack(cat){return JSON.stringify(cat).toLowerCase();}
 function renderCategory(cat,index){
   const subs=cat.subCategories||[];const itemCount=subs.reduce((n,sc)=>n+(sc.items||[]).length,0);
   const match=!query||categoryHaystack(cat).includes(query);if(query&&!match)return '';
-  const collapsed=query?'':' collapsed';
+  // Keep the user's expanded/collapsed state across state-driven renders (especially
+  // weight changes). Search intentionally opens matching categories.
+  const collapsed = query ? '' : (window.__openCategories && window.__openCategories.has(index) ? '' : ' collapsed');
   // Color cycle c1..c4 across the visible category list (deterministic by index)
   const colorCls = 'c' + ((index % 4) + 1);
   // The square shows the leading character(s) of the category name (no emoji per screenshot)
@@ -831,7 +833,14 @@ function render(){
   }
 }
 
-function toggleCategory(i){const el=$(`cat-${i}`);if(el)el.classList.toggle('collapsed');}
+function toggleCategory(i){
+  if(!window.__openCategories) window.__openCategories = new Set();
+  const el=$(`cat-${i}`);
+  if(!el)return;
+  const willOpen = el.classList.contains('collapsed');
+  el.classList.toggle('collapsed', !willOpen);
+  if(willOpen) window.__openCategories.add(i); else window.__openCategories.delete(i);
+}
 function loadGroup(name){
   if(!GROUPS[name])return;
   if(name==='adult'){ showAdultModal(); return; }
@@ -841,7 +850,7 @@ function loadGroup(name){
 }
 // showAppFor centralizes the post-intake app entry (used by loadGroup after a modal commits)
 function showAppFor(name){
-  currentGroup=name;query='';$('search').value='';$('home').style.display='none';$('app').style.display='block';
+  currentGroup=name;query='';window.__openCategories = new Set();$('search').value='';$('home').style.display='none';$('app').style.display='block';
   if(name==='pedi' && heightCm==null) heightCm=100;
   $('height').value=heightCm;$('age').value = ageYr!=null ? (ageYr<1 ? Math.round(ageYr*12) : Math.round(ageYr*10)/10) : ''; $('au').value = ageYr!=null && ageYr<1 ? 'mo':'yr'; $('sex').value=sex; render();window.scrollTo(0,0);
 }
