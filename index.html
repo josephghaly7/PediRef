@@ -235,7 +235,7 @@ details.raw{margin-top:8px}details.raw summary{cursor:pointer;color:#7181a3;font
     </div>
     <div class="modal-row">
       <label for="modalWeight">Weight</label>
-      <input id="modalWeight" type="number" min="0.1" max="300" step="0.1" placeholder="kg">
+      <input id="modalWeight" type="number" min="43" max="300" step="0.1" placeholder="kg">
       <span class="unit" id="modalWeightUnit">kg</span>
     </div>
     <div class="modal-row">
@@ -267,7 +267,7 @@ details.raw{margin-top:8px}details.raw summary{cursor:pointer;color:#7181a3;font
     <div class="peds-divider">or enter weight directly</div>
     <div class="modal-row">
       <label for="pedsModalWeight">Weight</label>
-      <input id="pedsModalWeight" type="number" min="0.1" max="150" step="0.1" placeholder="kg">
+      <input id="pedsModalWeight" type="number" min="0.5" max="43" step="0.1" placeholder="kg">
       <span class="unit" id="pedsModalWeightUnit">kg</span>
     </div>
     <div class="modal-row">
@@ -984,6 +984,11 @@ function commitPediModal(){
     if(w == null || w <= 0) return;
     chosenKg = pedsModalUnits === 'imperial' ? lbToKg(w) : w;
   }
+  // Peds gate: 0.5 kg <= weight <= 43 kg. Below/above → reject with a clear message.
+  if(!(chosenKg >= 0.5 && chosenKg <= 43)){
+    alert('Peds weight must be between 0.5 kg and 43 kg. Use ADULTS for patients > 43 kg.');
+    return;
+  }
   weightKg = chosenKg;
   weightSrc = pedsPickedBroselow ? 'broselow' : 'kg';
   ageYr = chosenAgeYr;
@@ -1060,6 +1065,11 @@ function commitAdultModal(){
   if(wRaw == null || wRaw <= 0) return;
   // Weight: always convert to kg
   weightKg = adultModalUnits === 'imperial' ? lbToKg(wRaw) : wRaw;
+  // Adult gate: weight > 43 kg. Below → reject with a clear message.
+  if(!(weightKg > 43)){
+    alert('Adults weight must be greater than 43 kg. Use PEDS for patients ≤ 43 kg.');
+    return;
+  }
   sex = $('modalSex').value;
   if(adultModalUseIbw){
     let cm = null;
@@ -1142,7 +1152,7 @@ function openActionPopover(kind){
       <h3>Patient weight</h3>
       <div class="ab-row">
         <label>Weight</label>
-        <input id="popWt" type="number" min="0.1" max="${im?'600':'300'}" step="0.1" value="${im?(Math.round(kgToLb(weightKg)*10)/10).toFixed(1):(Math.round(weightKg*10)/10).toFixed(1)}">
+        <input id="popWt" type="number" min="${currentGroup==='pedi'?0.5:43}" max="${im?(currentGroup==='pedi'?94.8:661.4):(currentGroup==='pedi'?43:300)}" step="0.1" value="${im?(Math.round(kgToLb(weightKg)*10)/10).toFixed(1):(Math.round(weightKg*10)/10).toFixed(1)}">
         <span style="font-size:.75rem;color:#6b7280">${im?'lb':'kg'}</span>
       </div>
       <div class="ab-row" style="margin-top:6px">
@@ -1223,7 +1233,17 @@ function openActionPopover(kind){
       if(kind === 'wt'){
         const v = num($('popWt').value);
         if(v == null || v <= 0) return;
-        weightKg = currentUnits === 'imperial' ? lbToKg(v) : v;
+        const newKg = currentUnits === 'imperial' ? lbToKg(v) : v;
+        // Enforce Peds (0.5-43 kg) / Adult (>43 kg) gate based on current group.
+        if(currentGroup === 'pedi' && !(newKg >= 0.5 && newKg <= 43)){
+          alert('Peds weight must be between 0.5 kg and 43 kg. Use ADULTS for patients > 43 kg.');
+          return;
+        }
+        if(currentGroup === 'adult' && !(newKg > 43)){
+          alert('Adults weight must be greater than 43 kg. Use PEDS for patients ≤ 43 kg.');
+          return;
+        }
+        weightKg = newKg;
         weightSrc = 'kg';
         ageYr = null;
       } else if(kind === 'age'){
