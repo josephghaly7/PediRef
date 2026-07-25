@@ -1,5 +1,5 @@
-// PediRef v15.19 — updated 2026-07-25 (v10.11: iOS Safari scroll-bounce fix)
-const CACHE = 'pediref-v15_19';
+// PediRef v15.20 — updated 2026-07-25 (v10.11: scroll-bounce fix v2 — generation counter)
+const CACHE = 'pediref-v15_20';
 const ASSETS = [
   '/',
   '/index.html',

@@ -797,28 +797,38 @@ function render(){
   updateActionBar();
   // Restore scroll position so iOS Safari doesn't bounce the user back to the top
   // after tapping a dose-segment button or the weight Apply button.
-  // On iOS, the keyboard collapse + focus restoration can trigger scroll AFTER a
-  // single rAF. We need to win the race against the OS-level scroll restoration.
+  // We use a generation counter: each render() bumps it, and each scheduled
+  // restoreScroll call checks the counter before firing. If a NEW render()
+  // starts (or the user manually scrolls) the previous generation's timers
+  // are invalidated — preventing the savedScroll=0 of an earlier render from
+  // clobbering a real user scroll.
+  window.__restoreGen = (window.__restoreGen || 0) + 1;
+  const myGen = window.__restoreGen;
   const restoreScroll = () => {
+    if(window.__restoreGen !== myGen) return;
     window.scrollTo(0, savedScroll);
     if(savedKey){
       const btn = document.querySelector(`[data-dose-key="${CSS.escape(savedKey)}"]`);
       if(btn) btn.focus({preventScroll: true});
     }
   };
-  // Run restoreScroll aggressively: rAF + rAF + setTimeout chain covering up to 1s
-  restoreScroll();
-  requestAnimationFrame(() => {
+  // Skip restoration if the user wasn't scrolled (most renders are at top)
+  // AND if this render was triggered by group entry (not by user action).
+  // We always run if savedScroll > 0; otherwise we let the page stay where it is.
+  if(savedScroll > 0){
     restoreScroll();
     requestAnimationFrame(() => {
+      if(window.__restoreGen !== myGen) return;
       restoreScroll();
-      setTimeout(restoreScroll, 50);
-      setTimeout(restoreScroll, 150);
-      setTimeout(restoreScroll, 300);
-      setTimeout(restoreScroll, 500);
-      setTimeout(restoreScroll, 1000);
+      requestAnimationFrame(() => {
+        if(window.__restoreGen !== myGen) return;
+        restoreScroll();
+        setTimeout(() => { if(window.__restoreGen === myGen) restoreScroll(); }, 50);
+        setTimeout(() => { if(window.__restoreGen === myGen) restoreScroll(); }, 150);
+        setTimeout(() => { if(window.__restoreGen === myGen) restoreScroll(); }, 300);
+      });
     });
-  });
+  }
 }
 
 function toggleCategory(i){const el=$(`cat-${i}`);if(el)el.classList.toggle('collapsed');}
