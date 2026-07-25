@@ -330,7 +330,22 @@ let query='';
 const $=id=>document.getElementById(id);
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function text(v){return String(v??'');}
-function list(v,cls){if(!Array.isArray(v)||!v.length)return '';return v.map(x=>`<div class="${cls}">${esc(x)}</div>`).join('');}
+// Strip the leading bullet glyph that appears throughout the source JSON
+// (e.g. "● If patient is < 24 hours old..."). We don't want the literal
+// bullet glyph in the rendered text — it was kept in the JSON as a visual
+// hint for the original STAT EM reference layout. Trim it + any whitespace
+// the original author put between the glyph and the sentence.
+function stripLeadingBullet(s){
+  if(typeof s !== 'string') return s;
+  // Match an optional whitespace + bullet glyph + any following whitespace.
+  // Bullet forms we strip: ● • · · ⋅ — – - ○ ► ▸
+  return s.replace(/^[\s\u2022\u2027\u00B7\u25CF\u25E6\u25AA\u25CB\u25BA\u25B8\u2013\u2014\-]+/u, '').trimStart();
+}
+
+function list(v,cls){
+  if(!Array.isArray(v)||!v.length) return '';
+  return v.map(x=>`<div class="${cls}">${esc(stripLeadingBullet(x))}</div>`).join('');
+}
 function num(v){const n=parseFloat(String(v??'').trim());return Number.isFinite(n)?n:null;}
 function fmt(n){if(!Number.isFinite(n))return '';const r=Math.round((n+Number.EPSILON)*1000)/1000;return String(r);}
 function stats(data){let subs=0,items=0,doses=0;for(const c of data.categories||[]){for(const sc of c.subCategories||[]){subs++;items+=(sc.items||[]).length;for(const i of sc.items||[])doses+=(i.dosages||[]).length;}}return{categories:(data.categories||[]).length,subs,items,doses};}
@@ -586,7 +601,7 @@ function fmt2(x){
 
 function renderStep(s, ibwLinked, stepKey){
   if(s&&typeof s==='object'&&('range1'in s||'formula'in s||'volumes'in s))return renderDose(s, ibwLinked, stepKey);
-  if(s&&typeof s==='object'&&'algostep'in s)return `<li class="step${s.title?' title':''}">${esc(s.algostep)}</li>`;
+  if(s&&typeof s==='object'&&'algostep'in s)return `<li class="step${s.title?' title':''}">${esc(stripLeadingBullet(s.algostep))}</li>`;
   return `<li class="step">${esc(typeof s==='string'?s:JSON.stringify(s))}</li>`;
 }
 
