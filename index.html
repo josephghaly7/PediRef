@@ -704,10 +704,146 @@ function renderCompactVitalsRow(item, rows, _tableHtml, source){
   return html;
 }
 
+// Common clinician-typed abbreviations → canonical drug terms.
+// When the user types a token, we also try each alias so "epi" finds
+// "Epinephrine", "ke" finds "Ketamine", "atrop" finds "Atropine", etc.
+const DRUG_ALIASES = {
+  'epi':'epinephrine','adrenaline':'epinephrine',
+  'ke':'ketamine','ket':'ketamine',
+  'atrop':'atropine',
+  'roc':'rocuronium','rocu':'rocuronium',
+  'sux':'succinylcholine','sch':'succinylcholine',
+  'versed':'midazolam','benzo':'benzodiazepine',
+  'fent':'fentanyl',
+  'norepi':'norepinephrine','levophed':'norepinephrine','levo':'norepinephrine',
+  'dopa':'dopamine',
+  'neo':'neostigmine',
+  'lido':'lidocaine','lignocaine':'lidocaine','xylocaine':'lidocaine',
+  'nsaid':'ibuprofen',
+  'asa':'aspirin',
+  'apap':'acetaminophen','tylenol':'acetaminophen',
+  'pe':'phenytoin','phe':'phenytoin',
+  'cefta':'ceftriaxone','rocephin':'ceftriaxone',
+  'cftr':'cefepime','cefepime':'cefepime','cefep':'cefepime',
+  'vanc':'vancomycin',
+  'zosyn':'piperacillin','pip-tazo':'piperacillin',
+  'cefax':'cefotaxime',
+  'pavulon':'pancuronium',
+  'narcan':'naloxone',
+  // Indication aliases — match free text in item.information[] / item.notes.
+  // e.g. "sepsis" → "septic shock" finds items whose notes say "septic shock".
+  'sepsis':'septic shock',
+  'septic':'septic shock',
+  'anaphylaxis':'anaphylaxis',
+  'seizure':'seizure','sz':'seizure','status':'status epilepticus',
+  'croup':'croup',
+  'asthma':'asthma',
+  'dka':'diabetic ketoacidosis','ketoacidosis':'diabetic ketoacidosis',
+  'rsv':'respiratory syncytial virus',
+  'bronchiolitis':'bronchiolitis',
+};
+
+// Tokenize a freeform query into lowercased word tokens. Hyphens and
+// apostrophes inside an alias are preserved ("norepi" / "norepinephrine").
+function tokenizeQuery(q){
+  return (q||'').toLowerCase().trim().split(/\s+/).filter(Boolean);
+}
+
+// Expand one token via the alias map (recursive: chain of aliases resolves
+// to a list of tokens we OR-match). Returns the original token + any aliases.
+function expandAlias(tok){
+  const out = [tok];
+  let cur = tok;
+  // up to 3 hops to avoid pathological loops
+  for(let i=0;i<3;i++){
+    const next = DRUG_ALIASES[cur];
+    if(!next || out.includes(next)) break;
+    out.push(next);
+    cur = next;
+  }
+  return out;
+}
+
+// Score a single item against a tokenized query. Returns:
+//   {score: number, matchedTokens: string[]}
+// Higher score = better match. Returns score 0 if no token matches.
+function scoreItem(item, tokens){
+  if(!tokens.length) return {score:0, matchedTokens:[]};
+  // Build the searchable text for this item: name, brand, notes,
+  // information array, plus every dosage entry's label/formula/unit/range.
+  let txt = '';
+  txt += ' ' + (item.name || '');
+  txt += ' ' + (item.brand || '');
+  if(Array.isArray(item.notes)) for(const n of item.notes) txt += ' ' + n;
+  if(Array.isArray(item.information)) for(const n of item.information) txt += ' ' + n;
+  if(Array.isArray(item.dosages)) for(const d of item.dosages){
+    txt += ' ' + (d.label||'') + ' ' + (d.formula||'') + ' ' + (d.unit||'') + ' '
+         +  (d.range1||'') + ' ' + (d.range2||'') + ' ' + (d.rangeUnit||'');
+  }
+  if(Array.isArray(item.steps)) for(const st of item.steps){
+    txt += ' ' + (st.algostep||'');
+  }
+  const lower = txt.toLowerCase();
+
+  let score = 0;
+  const matched = [];
+  for(const tokRaw of tokens){
+    const alts = expandAlias(tokRaw);
+    let best = 0;
+    let bestAlt = null;
+    for(const alt of alts){
+      const idx = lower.indexOf(alt);
+      if(idx < 0) continue;
+      // Stronger signal when the alt matches the item name itself.
+      const nameMatch = (item.name||'').toLowerCase().indexOf(alt) >= 0;
+      const brandMatch = (item.brand||'').toLowerCase().indexOf(alt) >= 0;
+      const points = (nameMatch ? 100 : 0) + (brandMatch ? 60 : 0) + 10;
+      if(points > best){ best = points; bestAlt = alt; }
+    }
+    if(best > 0){
+      score += best;
+      matched.push(bestAlt || tokRaw);
+    }
+  }
+  return { score, matchedTokens: matched };
+}
+
 function categoryHaystack(cat){return JSON.stringify(cat).toLowerCase();}
+
+// Count total items that match the current query across all categories of
+// the current group. Used to populate the "N matching items" badge in the
+// coverage bar. Mirrors the per-item filter logic in renderCategory().
+function countMatchedItems(data){
+  const tokens = tokenizeQuery(query);
+  if(!tokens.length) return 0;
+  let n = 0;
+  for(const cat of (data.categories||[])){
+    for(const sc of (cat.subCategories||[])){
+      for(const it of (sc.items||[])){
+        if(scoreItem(it, tokens).score > 0) n++;
+      }
+    }
+  }
+  return n;
+}
 function renderCategory(cat,index){
-  const subs=cat.subCategories||[];const itemCount=subs.reduce((n,sc)=>n+(sc.items||[]).length,0);
-  const match=!query||categoryHaystack(cat).includes(query);if(query&&!match)return '';
+  const subs=cat.subCategories||[];
+  // When searching: filter items inside each subcategory to only those that
+  // match the query (so we don't dump the whole category when the user types
+  // a drug name). When not searching: show everything as before.
+  const tokens = tokenizeQuery(query);
+  if(tokens.length){
+    let keptItems = 0;
+    for(const sc of subs){
+      const items = sc.items || [];
+      const scored = items.map(it => ({ it, ...scoreItem(it, tokens) }))
+                          .filter(x => x.score > 0);
+      sc.__matched = scored;
+      keptItems += scored.length;
+    }
+    if(keptItems === 0) return '';
+  }
+  const itemCount=subs.reduce((n,sc)=>n+(sc.items||[]).length,0);
   // Keep the user's expanded/collapsed state across state-driven renders (especially
   // weight changes). Search intentionally opens matching categories.
   const collapsed = query ? '' : (window.__openCategories && window.__openCategories.has(index) ? '' : ' collapsed');
@@ -715,12 +851,14 @@ function renderCategory(cat,index){
   const colorCls = 'c' + ((index % 4) + 1);
   // The square shows the leading character(s) of the category name (no emoji per screenshot)
   const initial = (cat.name||'').trim().charAt(0).toUpperCase() || '•';
-  let h=`<section class="category${collapsed}" id="cat-${index}"><button class="cat-row" onclick="toggleCategory(${index})" aria-expanded="${query ? 'true' : 'false'}"><span class="cat-square ${colorCls}">${esc(initial)}</span><span class="cat-name">${esc(cat.name)}<span class="cat-meta">${itemCount} entr${itemCount===1?'y':'ies'}</span></span><span class="cat-chevron">▾</span></button><div class="category-body">`;
+  let h=`<section class="category${collapsed}" id="cat-${index}"><button class="cat-row" onclick="toggleCategory(${index})" aria-expanded="true"><span class="cat-square ${colorCls}">${esc(initial)}</span><span class="cat-name">${esc(cat.name)}<span class="cat-meta">${itemCount} entr${itemCount===1?'y':'ies'}</span></span><span class="cat-chevron">▾</span></button><div class="category-body">`;
   if(!subs.length)h+='<div class="empty">This category is present in the JSON but has no subcategories/items.</div>';
   for(const [si,sc] of subs.entries()){
-    const items=sc.items||[];h+=`<div class="subcategory"><div class="subcategory-title">${esc(sc.name||'Unnamed subcategory')} · ${items.length} entr${items.length===1?'y':'ies'}</div>`;
+    const items = tokens.length ? (sc.__matched || []) : (sc.items || []).map(it=>({it, score:0, matchedTokens:[]}));
+    if(tokens.length && items.length === 0) continue;
+    h+=`<div class="subcategory"><div class="subcategory-title">${esc(sc.name||'Unnamed subcategory')} · ${items.length} match${items.length===1?'':'es'}</div>`;
     if(!items.length)h+='<div class="empty">No items in this subcategory (exactly as provided).</div>';
-    else h+=items.map(renderItem).join('');h+='</div>';
+    else h+=items.map(x=>renderItem(x.it)).join('');h+='</div>';
   }
   h+='</div></section>';return h;
 }
@@ -788,12 +926,12 @@ function render(){
   } else {
     cov += `</b>`;
   }
-  if(query) cov += ` · search: <b>“${esc(query)}”</b>`;
+  if(query) cov += ` · search: <b>“${esc(query)}”</b> · <span class="src-from">${countMatchedItems(data)} matching items</span>`;
   $('coverage').innerHTML = cov;
   $('coverage').appendChild(document.createElement('br'));
   $('coverage').insertAdjacentHTML('beforeend', vitalsBadge());
   $('coverage').insertAdjacentHTML('beforeend', ibwBadge());
-  const body=(data.categories||[]).map(renderCategory).join('');$('results').innerHTML=body||'<div class="no-results">No JSON entries match that search.</div>';
+  const body=(data.categories||[]).map(renderCategory).join('');$('results').innerHTML=body||`<div class="no-results">No items match “<b>${esc(query)}</b>”. Try a partial drug name (e.g. <b>ket</b>, <b>epi</b>, <b>roc</b>) or an indication word (e.g. <b>sepsis</b>, <b>seizure</b>).</div>`;
   document.querySelectorAll('.switcher button').forEach(b=>b.classList.toggle('active',b.dataset.group===currentGroup));
   // v10: keep the floating action bar in sync with the canonical state
   updateActionBar();
