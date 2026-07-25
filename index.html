@@ -448,6 +448,12 @@ function calculatedDose(d, ibwLinked){
 const doseSelection = {};
 window.pickDoseSegment = function(doseKey, segIdx){
   doseSelection[doseKey] = segIdx;
+  // v10.11: blur the tapped button before re-rendering. Otherwise iOS Safari
+  // auto-scrolls to keep the focused element in view — but the element is about
+  // to be replaced by render(), so Safari scrolls the page to the top.
+  if(document.activeElement && document.activeElement !== document.body){
+    document.activeElement.blur();
+  }
   // Re-render the categories list. Cheap enough; no virtual DOM.
   if(typeof render === 'function') render();
 };
@@ -555,7 +561,7 @@ function renderDose(d, ibwLinked, doseKey){
     const buttons = segs.map((s, i) => {
       const isActive = i === segIdx;
       const label = hasKgMult ? `${s} ${esc(d.unit||'')}/kg` : (d.unit ? `${s} ${esc(d.unit)}` : s);
-      return `<button type="button" class="${isActive?'active':''}" onclick="pickDoseSegment('${esc(doseKey)}',${i})">${esc(label)}</button>`;
+      return `<button type="button" data-dose-key="${esc(doseKey)}" data-seg-idx="${i}" class="${isActive?'active':''}" onclick="pickDoseSegment('${esc(doseKey)}',${i})">${esc(label)}</button>`;
     }).join('');
     sliderHtml = `<div class="dose-slider">${buttons}</div>`;
   }
@@ -740,6 +746,12 @@ function ibwBadge(){
 
 function render(){
   if(!currentGroup)return;const g=GROUPS[currentGroup],data=g.data,s=stats(data);
+  // Preserve scroll across re-renders. iOS Safari auto-scrolls to keep the focused
+  // element in view; when we replace #results.innerHTML the focused element is
+  // destroyed and Safari scrolls the page to the top. Save+restore avoids that.
+  const savedScroll = window.scrollY;
+  const savedActive = document.activeElement;
+  const savedKey = savedActive && savedActive.dataset && savedActive.dataset.doseKey;
   $('groupTitle').textContent = 'Categories';
   let desc=`${s.categories} categories · ${s.items} entries · ${s.doses} dosages`;
   if(currentGroup==='pedi'){
@@ -783,6 +795,17 @@ function render(){
   document.querySelectorAll('.switcher button').forEach(b=>b.classList.toggle('active',b.dataset.group===currentGroup));
   // v10: keep the floating action bar in sync with the canonical state
   updateActionBar();
+  // Restore scroll position so iOS Safari doesn't bounce the user back to the top
+  // after tapping a dose-segment button or the weight Apply button.
+  // Use rAF so the browser has time to repaint before we restore.
+  requestAnimationFrame(() => {
+    window.scrollTo(0, savedScroll);
+    // Re-focus the dose segment button the user tapped, so keyboard / a11y stays sane.
+    if(savedKey){
+      const btn = document.querySelector(`[data-dose-key="${CSS.escape(savedKey)}"]`);
+      if(btn) btn.focus({preventScroll: true});
+    }
+  });
 }
 
 function toggleCategory(i){const el=$(`cat-${i}`);if(el)el.classList.toggle('collapsed');}
@@ -1200,6 +1223,12 @@ function openActionPopover(kind){
           ageYr = null;
         }
       }
+      // v10.11: blur any focused input inside the popover BEFORE closing it.
+      // On iOS Safari, removing the focused element from the DOM causes the browser
+      // to auto-scroll the page to the top of the scroll container. Blurring first
+      // prevents that bounce.
+      const focused = document.activeElement;
+      if(focused && focused !== document.body) focused.blur();
       closeActionPopover();
       render();
     });
