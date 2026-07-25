@@ -33,7 +33,7 @@ button,input,select{font:inherit}button{cursor:pointer}
 .empty{padding:11px;color:#7485a8;font-size:.68rem;font-style:italic}
 .item{padding:11px 9px;border-top:1px solid #253452}.item:first-of-type{border-top:0}
 .item-name{font-size:.78rem;font-weight:800;color:var(--text);display:flex;align-items:flex-start;gap:7px}.item-name .brand{font-size:.62rem;color:var(--muted);font-weight:500;margin-left:auto;text-align:right}
-.item-note,.info-line,.formula,.value-block,.flag{font-size:.68rem;line-height:1.45;color:#c1cce2;margin-top:5px}.info-line::before{content:"• ";color:var(--accent)}
+.item-note,.info-line,.formula,.value-block,.flag{font-size:.68rem;line-height:1.45;color:#c1cce2;margin-top:5px}
 .formula{color:var(--yellow);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
 .flag{color:var(--yellow);font-weight:700}.flag.ibw{color:var(--green);font-weight:700}
 .steps{margin:7px 0 0;padding:0;list-style:none}.step{font-size:.69rem;line-height:1.45;color:#cbd5e9;padding:3px 0;white-space:pre-wrap}.step.title{color:var(--accent);font-weight:900;padding-top:7px}
@@ -152,7 +152,6 @@ details.raw{margin-top:8px}details.raw summary{cursor:pointer;color:#7181a3;font
 #app .item-name{font-size:.82rem;font-weight:700;color:#111;display:flex;align-items:flex-start;gap:7px}
 #app .item-name .brand{font-size:.62rem;color:#6b7280;font-weight:500;margin-left:auto;text-align:right}
 #app .item-note,#app .info-line,#app .formula,#app .value-block,#app .flag{font-size:.7rem;line-height:1.5;color:#374151;margin-top:5px}
-#app .info-line::before{content:"\2022 ";color:#1d6ff0}
 #app .formula{color:#7a4d00;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;background:#fff7e6;border-radius:6px;padding:6px 8px}
 #app .flag{color:#7a4d00;font-weight:700}
 #app .flag.ibw{color:#0a7c2f;font-weight:700}
@@ -330,22 +329,33 @@ let query='';
 const $=id=>document.getElementById(id);
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function text(v){return String(v??'');}
-// Strip the leading bullet glyph that appears throughout the source JSON
+// Strip leading bullet glyphs that appear throughout the source JSON
 // (e.g. "● If patient is < 24 hours old..."). We don't want the literal
 // bullet glyph in the rendered text — it was kept in the JSON as a visual
-// hint for the original STAT EM reference layout. Trim it + any whitespace
-// the original author put between the glyph and the sentence.
+// hint for the original STAT EM reference layout. Also strip bullets that
+// start a NEW LINE inside a multi-line string (algorithmic steps often have
+// one `algostep` value with multiple bullet-separated sub-items on \n).
+// Bullet forms we strip: ● • · ⋅ ○ ► ▸ and an em/en-dash used as a bullet.
+const BULLET_REGEX = /[\s\u2022\u2027\u00B7\u25CF\u25E6\u25AA\u25CB\u25BA\u25B8\u2013\u2014\-]+/u;
+
 function stripLeadingBullet(s){
   if(typeof s !== 'string') return s;
-  // Match an optional whitespace + bullet glyph + any following whitespace.
-  // Bullet forms we strip: ● • · · ⋅ — – - ○ ► ▸
   return s.replace(/^[\s\u2022\u2027\u00B7\u25CF\u25E6\u25AA\u25CB\u25BA\u25B8\u2013\u2014\-]+/u, '').trimStart();
+}
+
+// Walk every line of a multi-line string and strip the leading bullet from
+// each one. Used for `algostep` values that carry a list inside a single
+// JSON string (each line of the list got its own `●` in the source).
+function stripBulletsPerLine(s){
+  if(typeof s !== 'string') return s;
+  return s.split(/[\r\n]+/).map(stripLeadingBullet).join('\n');
 }
 
 function list(v,cls){
   if(!Array.isArray(v)||!v.length) return '';
-  return v.map(x=>`<div class="${cls}">${esc(stripLeadingBullet(x))}</div>`).join('');
+  return v.map(x=>`<div class="${cls}">${esc(stripBulletsPerLine(x))}</div>`).join('');
 }
+
 function num(v){const n=parseFloat(String(v??'').trim());return Number.isFinite(n)?n:null;}
 function fmt(n){if(!Number.isFinite(n))return '';const r=Math.round((n+Number.EPSILON)*1000)/1000;return String(r);}
 function stats(data){let subs=0,items=0,doses=0;for(const c of data.categories||[]){for(const sc of c.subCategories||[]){subs++;items+=(sc.items||[]).length;for(const i of sc.items||[])doses+=(i.dosages||[]).length;}}return{categories:(data.categories||[]).length,subs,items,doses};}
@@ -582,7 +592,7 @@ function renderDose(d, ibwLinked, doseKey){
   }
 
   let h = `<div class="dose">`;
-  if(d.label) h += `<div class="dose-label">${esc(d.label)}</div>`;
+  if(d.label) h += `<div class="dose-label">${esc(stripLeadingBullet(d.label))}</div>`;
   if(pairLeft || pairRight){
     h += `<div class="dose-pair"><span class="left">${pairLeft||'&nbsp;'}</span><span class="right">${pairRight||'&nbsp;'}</span></div>`;
   }
@@ -601,7 +611,7 @@ function fmt2(x){
 
 function renderStep(s, ibwLinked, stepKey){
   if(s&&typeof s==='object'&&('range1'in s||'formula'in s||'volumes'in s))return renderDose(s, ibwLinked, stepKey);
-  if(s&&typeof s==='object'&&'algostep'in s)return `<li class="step${s.title?' title':''}">${esc(stripLeadingBullet(s.algostep))}</li>`;
+  if(s&&typeof s==='object'&&'algostep'in s)return `<li class="step${s.title?' title':''}">${esc(stripBulletsPerLine(s.algostep))}</li>`;
   return `<li class="step">${esc(typeof s==='string'?s:JSON.stringify(s))}</li>`;
 }
 
