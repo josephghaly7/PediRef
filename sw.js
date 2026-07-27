@@ -1,5 +1,5 @@
-// PediRef v15.20 — updated 2026-07-25 (v10.11: scroll-bounce fix v2 — generation counter)
-const CACHE = 'pediref-v15_20';
+// PediRef v15.24 — updated 2026-07-27 (v10.12: Peds intake modal — height + age inputs + Broselow length ranges)
+const CACHE = 'pediref-v15_24';
 const ASSETS = [
   '/',
   '/index.html',

@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef v10.10 · STAT EM-style meds (slider + all concentrations + per-bottle mL)</title><style>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>PediRef v10.12 · Peds intake modal (height + age + Broselow length ranges)</title><style>
 :root{color-scheme:dark;--bg:#0b1020;--panel:#131b31;--panel2:#18233d;--line:#2a395d;--text:#edf2ff;--muted:#9aa9c7;--accent:#8ea7ff;--green:#57d68d;--yellow:#f6cf65;--red:#ff7474;--cat1:#1da1f2;--cat2:#ff8a3d;--cat3:#5cba47;--cat4:#e23aa6}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
@@ -68,6 +68,8 @@ details.raw{margin-top:8px}details.raw summary{cursor:pointer;color:#7181a3;font
 .peds-color-tile .tile-name{font-size:.78rem;font-weight:900;letter-spacing:.02em}
 .peds-color-tile .tile-kg{font-size:.95rem;font-weight:900;line-height:1}
 .peds-color-tile .tile-kg .unit{font-size:.55rem;font-weight:700;opacity:.7;margin-left:2px}
+.peds-color-tile .tile-len{font-size:.72rem;font-weight:700;opacity:.85;line-height:1;margin-top:1px}
+.peds-color-tile .tile-len .unit{font-size:.55rem;font-weight:700;opacity:.7;margin-left:1px}
 .peds-color-name-Preemie{background:#e8f4f8;color:#1c3a4a}
 .peds-color-name-Gray{background:#b8b8b8;color:#1a1a1a}
 .peds-color-name-Pink{background:#f8c8d0;color:#5a1a24}
@@ -261,13 +263,32 @@ details.raw{margin-top:8px}details.raw summary{cursor:pointer;color:#7181a3;font
 <div class="modal-backdrop" id="pedsModal" role="dialog" aria-modal="true" aria-labelledby="pedsModalTitle">
   <div class="modal">
     <h2 id="pedsModalTitle">🧒 Peds intake</h2>
-    <p class="modal-sub">Pick a Broselow-Luten color to set the dose weight, or enter a weight directly.</p>
+    <p class="modal-sub">Pick a Broselow-Luten color band — each shows its weight and length range. Or enter weight, height, or age directly.</p>
     <div class="peds-color-grid" id="pedsColorGrid"></div>
-    <div class="peds-divider">or enter weight directly</div>
+    <div class="peds-divider">or enter directly</div>
     <div class="modal-row">
       <label for="pedsModalWeight">Weight</label>
       <input id="pedsModalWeight" type="number" min="0.5" max="43" step="0.1" placeholder="kg">
       <span class="unit" id="pedsModalWeightUnit">kg</span>
+    </div>
+    <div class="modal-row">
+      <label for="pedsModalHeightCm">Height</label>
+      <span class="modal-imperial-fields">
+        <input id="pedsModalHeightFt" type="number" min="1" max="6" step="1" placeholder="ft">
+        <span class="unit">ft</span>
+        <input id="pedsModalHeightIn" type="number" min="0" max="11.9" step="0.1" placeholder="in">
+        <span class="unit">in</span>
+      </span>
+      <input id="pedsModalHeightCm" type="number" min="40" max="200" step="0.5" placeholder="cm">
+      <span class="unit" id="pedsModalHeightUnit">cm</span>
+    </div>
+    <div class="modal-row">
+      <label for="pedsModalAge">Age</label>
+      <input id="pedsModalAge" type="number" min="0" max="18" step="0.1" placeholder="yr or mo">
+      <select id="pedsModalAu">
+        <option value="yr" selected>yr</option>
+        <option value="mo">mo</option>
+      </select>
     </div>
     <div class="modal-row">
       <label>Units</label>
@@ -1069,9 +1090,10 @@ function renderPediGrid(){
   const grid = $('pedsColorGrid');
   grid.innerHTML = BROSLOW.map((b, i) => {
     const sub = b.sub ? ` · ${b.sub}` : '';
-    return `<button type="button" class="peds-color-tile peds-color-name-${esc(b.c)}" data-bi="${i}" aria-label="${esc(b.c)}${sub}, ${b.doseKg} kilograms">
+    return `<button type="button" class="peds-color-tile peds-color-name-${esc(b.c)}" data-bi="${i}" aria-label="${esc(b.c)}${sub}, ${b.doseKg} kilograms, ${fmt(b.lenLo)} to ${fmt(b.lenHi)} centimeters">
       <span class="tile-name">${esc(b.c)}${sub ? `<span style="font-size:.6rem;font-weight:700;opacity:.7">${esc(sub)}</span>` : ''}</span>
       <span class="tile-kg">${fmt(b.doseKg)}<span class="unit">kg</span></span>
+      <span class="tile-len">${fmt(b.lenLo)}–${fmt(b.lenHi)}<span class="unit">cm</span></span>
     </button>`;
   }).join('');
   grid.querySelectorAll('.peds-color-tile').forEach(el => {
@@ -1092,12 +1114,26 @@ function applyPediColor(b){
     $('pedsModalWeight').value = b.doseKg;
     $('pedsModalWeightUnit').textContent = 'kg';
   }
-  updatePediGo();
+  // Clear other direct-entry fields so the band is the active source
+  $('pedsModalHeightCm').value = '';
+  $('pedsModalHeightFt').value = '';
+  $('pedsModalHeightIn').value = '';
+  $('pedsModalAge').value = '';
+  updatePediGo(true);  // skip the "typing clears band" check inside applyPediColor
 }
 function applyPediUnits(){
   const imperial = pedsModalUnits === 'imperial';
   $('pedsModalUnitsMetric').classList.toggle('active', !imperial);
   $('pedsModalUnitsImperial').classList.toggle('active', imperial);
+  // Weight row label
+  $('pedsModalWeightUnit').textContent = imperial ? 'lb' : 'kg';
+  // Height row: show ft+in (imperial) or cm (metric)
+  $('pedsModalHeightCm').style.display = imperial ? 'none' : '';
+  $('pedsModalHeightUnit').style.display = imperial ? 'none' : '';
+  document.querySelectorAll('#pedsModal .modal-row').forEach(row => {
+    const ftInSpan = row.querySelector('.modal-imperial-fields');
+    if(ftInSpan) ftInSpan.style.display = imperial ? '' : 'none';
+  });
   if(pedsPickedBroselow){
     if(imperial){
       $('pedsModalWeight').value = Math.round(kgToLb(pedsPickedBroselow.doseKg) * 10) / 10;
@@ -1112,17 +1148,64 @@ function applyPediUnits(){
     if(v != null && v > 0 && imperial) $('pedsModalWeight').value = Math.round(kgToLb(v) * 10) / 10;
   }
 }
-function updatePediGo(){
+function updatePediGo(skipBandClear){
+  // Typing in any direct-entry field clears the Broselow band selection —
+  // the band and the inputs are mutually exclusive sources.
+  if(!skipBandClear){
+    const anyTyped =
+      (num($('pedsModalHeightCm').value) || 0) > 0 ||
+      (num($('pedsModalHeightFt').value) || 0) > 0 ||
+      (num($('pedsModalHeightIn').value) || 0) > 0 ||
+      (num($('pedsModalAge').value) || 0) > 0 ||
+      (num($('pedsModalWeight').value) || 0) > 0;
+    if(anyTyped && pedsPickedBroselow != null){
+      pedsPickedBroselow = null;
+      document.querySelectorAll('.peds-color-tile').forEach(el => el.classList.remove('picked'));
+    }
+  }
   const picked = pedsPickedBroselow != null;
   const w = num($('pedsModalWeight').value);
   const hasW = w != null && w > 0;
-  $('pedsModalGo').disabled = !(picked || hasW);
+  // Height: any of cm or ft+in counts
+  let cm = num($('pedsModalHeightCm').value);
+  if(cm == null || cm <= 0){
+    const ft = num($('pedsModalHeightFt').value) || 0;
+    const inches = num($('pedsModalHeightIn').value) || 0;
+    if(ft > 0 || inches > 0) cm = ftInToCm(ft, inches);
+  }
+  const hasH = cm != null && cm > 0;
+  const age = num($('pedsModalAge').value);
+  const hasA = age != null && age > 0;
+  $('pedsModalGo').disabled = !(picked || hasW || hasH || hasA);
 }
 function showPediModal(){
   if(weightKg == null || !Number.isFinite(weightKg) || weightKg <= 0) weightKg = 15;
   pedsPickedBroselow = null;
   pedsModalUnits = currentUnits === 'imperial' ? 'imperial' : 'metric';
   $('pedsModalWeight').value = '';
+  $('pedsModalHeightCm').value = '';
+  $('pedsModalHeightFt').value = '';
+  $('pedsModalHeightIn').value = '';
+  $('pedsModalAge').value = '';
+  // Pre-populate height/age from current state
+  if(heightCm != null && Number.isFinite(heightCm) && heightCm > 0){
+    if(pedsModalUnits === 'imperial'){
+      const fi = cmToFtIn(heightCm);
+      $('pedsModalHeightFt').value = fi.ft;
+      $('pedsModalHeightIn').value = fi.inches;
+    } else {
+      $('pedsModalHeightCm').value = Math.round(heightCm * 10) / 10;
+    }
+  }
+  if(ageYr != null && Number.isFinite(ageYr) && ageYr > 0){
+    if(ageYr < 1){
+      $('pedsModalAge').value = Math.round(ageYr * 12);
+      $('pedsModalAu').value = 'mo';
+    } else {
+      $('pedsModalAge').value = Math.round(ageYr * 10) / 10;
+      $('pedsModalAu').value = 'yr';
+    }
+  }
   applyPediUnits();
   renderPediGrid();
   updatePediGo();
@@ -1130,8 +1213,11 @@ function showPediModal(){
 }
 function hidePediModal(){ $('pedsModal').classList.remove('open'); }
 function commitPediModal(){
+  // Resolve weight from the modal's inputs, in this priority:
+  //   explicit weight > Broselow band > height > age
   let chosenKg = null;
   let chosenAgeYr = null;
+  let chosenHeightCm = null;
   if(pedsPickedBroselow){
     chosenKg = pedsPickedBroselow.doseKg;
     const b = pedsPickedBroselow;
@@ -1140,13 +1226,44 @@ function commitPediModal(){
     } else if(b.sub === '2mo'){
       chosenAgeYr = 2/12;
     }
-    // For preemie/newborn rows where ageLo===ageHi===0, leave ageYr as null
-    // so the in-app age input starts blank (matches your data: age is not the dose key).
+    chosenHeightCm = Math.round((b.lenLo + b.lenHi) / 2);
   } else {
     const w = num($('pedsModalWeight').value);
-    if(w == null || w <= 0) return;
-    chosenKg = pedsModalUnits === 'imperial' ? lbToKg(w) : w;
+    if(w != null && w > 0){
+      chosenKg = pedsModalUnits === 'imperial' ? lbToKg(w) : w;
+      weightSrc = 'kg';
+    } else {
+      // Try height
+      let cm = num($('pedsModalHeightCm').value);
+      if(cm == null || cm <= 0){
+        const ft = num($('pedsModalHeightFt').value) || 0;
+        const inches = num($('pedsModalHeightIn').value) || 0;
+        if(ft > 0 || inches > 0) cm = ftInToCm(ft, inches);
+      }
+      if(cm != null && cm > 0){
+        chosenKg = kgFromHeight(cm);
+        chosenHeightCm = cm;
+        weightSrc = 'height';
+      } else {
+        // Try age
+        const age = num($('pedsModalAge').value);
+        if(age != null && age > 0){
+          const yr = $('pedsModalAu').value === 'mo' ? age / 12 : age;
+          chosenKg = kgFromAge(yr);
+          chosenAgeYr = yr;
+          weightSrc = 'age';
+          // Also derive height from the resolved Broselow band
+          const b = findBroselow(chosenKg);
+          chosenHeightCm = Math.round((b.lenLo + b.lenHi) / 2);
+        } else {
+          // Nothing provided — keep current state, just close
+          hidePediModal();
+          return;
+        }
+      }
+    }
   }
+  if(chosenKg == null) return;
   // Peds gate: 0.5 kg <= weight <= 43 kg. Below/above → reject with a clear message.
   if(!(chosenKg >= 0.5 && chosenKg <= 43)){
     alert('Peds weight must be between 0.5 kg and 43 kg. Use ADULTS for patients > 43 kg.');
@@ -1660,13 +1777,42 @@ function init(){
   // Enter inside any modal field submits
   ['modalHeight','modalHeightFt','modalHeightIn','modalWeight'].forEach(id => $(id).addEventListener('keydown', e=>{ if(e.key === 'Enter') commitAdultModal(); }));
 
-  $('pedsModalWeight').addEventListener('input', updatePediGo);
-  $('pedsModalUnitsMetric').addEventListener('click', ()=>{ pedsModalUnits='metric'; applyPediUnits(); });
-  $('pedsModalUnitsImperial').addEventListener('click', ()=>{ pedsModalUnits='imperial'; applyPediUnits(); });
+  $('pedsModalWeight').addEventListener('input', ()=>updatePediGo());
+  ['pedsModalHeightCm','pedsModalHeightFt','pedsModalHeightIn','pedsModalAge'].forEach(id => $(id).addEventListener('input', ()=>updatePediGo()));
+  $('pedsModalUnitsMetric').addEventListener('click', ()=>{
+    if(pedsModalUnits === 'metric') return;
+    // Convert any imperial values to metric
+    const ft = num($('pedsModalHeightFt').value) || 0;
+    const inches = num($('pedsModalHeightIn').value) || 0;
+    const cm = ftInToCm(ft, inches);
+    const lb = num($('pedsModalWeight').value) || 0;
+    pedsModalUnits = 'metric';
+    applyPediUnits();
+    $('pedsModalHeightCm').value = cm > 0 ? Math.round(cm * 10) / 10 : '';
+    $('pedsModalHeightFt').value = '';
+    $('pedsModalHeightIn').value = '';
+    if(lb > 0) $('pedsModalWeight').value = Math.round(lbToKg(lb) * 10) / 10;
+    updatePediGo();
+  });
+  $('pedsModalUnitsImperial').addEventListener('click', ()=>{
+    if(pedsModalUnits === 'imperial') return;
+    const cm = num($('pedsModalHeightCm').value) || 0;
+    const kg = num($('pedsModalWeight').value) || 0;
+    pedsModalUnits = 'imperial';
+    applyPediUnits();
+    if(cm > 0){
+      const fi = cmToFtIn(cm);
+      $('pedsModalHeightFt').value = fi.ft;
+      $('pedsModalHeightIn').value = fi.inches;
+      $('pedsModalHeightCm').value = '';
+    }
+    if(kg > 0) $('pedsModalWeight').value = Math.round(kgToLb(kg) * 10) / 10;
+    updatePediGo();
+  });
   $('pedsModalCancel').addEventListener('click', ()=>{ hidePediModal(); });
   $('pedsModalGo').addEventListener('click', ()=>{ commitPediModal(); });
   $('pedsModal').addEventListener('click', e=>{ if(e.target === $('pedsModal')) hidePediModal(); });
-  $('pedsModalWeight').addEventListener('keydown', e=>{ if(e.key === 'Enter' && !$('pedsModalGo').disabled) commitPediModal(); });
+  ['pedsModalWeight','pedsModalHeightCm','pedsModalHeightFt','pedsModalHeightIn','pedsModalAge'].forEach(id => $(id).addEventListener('keydown', e=>{ if(e.key === 'Enter' && !$('pedsModalGo').disabled) commitPediModal(); }));
 }
 init();
 </script></body></html>
